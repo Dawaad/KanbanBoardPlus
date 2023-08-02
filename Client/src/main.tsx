@@ -5,7 +5,7 @@ import "./index.css";
 
 //Importing Layouts
 import Layout from "./Layouts/Layout";
-
+import UserLayout from "./Layouts/UserLayout";
 //Loading routes asynchronously
 const Dashboard = React.lazy(() => import("./pages/my/Dashboard"));
 const TaskBoard = React.lazy(() => import("./pages/my/TaskBoard"));
@@ -16,11 +16,11 @@ const Error = React.lazy(() => import("./pages/Error"));
 const routes = (
   <>
     <Route>
-      <Route index path="/" element={<Home />} />
+      <Route index element={<Home />} />
       <Route path="/login" element={<Login />} />
     </Route>
-    <Route path="/my">
-      <Route path="/my" element={<Dashboard />} />
+    <Route path="/my" element={<UserLayout/>}>
+      <Route  index element={<Dashboard />} />
       <Route path="board/:group" element={<TaskBoard />} />
     </Route>
     <Route path="*" element={<Error />} />

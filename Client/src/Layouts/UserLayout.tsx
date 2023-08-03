@@ -11,31 +11,31 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
     <div>
       {/* Your common layout elements */}
       <header>
-        <div className="flex flex-col md:flex-row items-center p-5 bg-zinc-500/5  rounded-b-2xl">
+        <div className="flex flex-col md:flex-row items-center px-5 py-3 bg-zinc-800">
           <div className="absolute top-0 left-0 w-full  h-[40rem] bg-gradient-to-br from-pink-400 to-blue-500 rounded-md filter blur-3xl opacity-60 -z-10"></div>
 
           {/*Title*/}
-          <h1 className="text-3xl font-bold pb-10 md:pb-0">Kanban Board</h1>
+          <Link to={'/'} className="text-2xl text-zinc-400 font-bold pb-10 md:pb-0">Kanban Board</Link>
           {/*Search Bar*/}
           <div className="flex items-center space-x-5  flex-1 justify-end w-full">
-            <form className="flex items-center space-x-5 bg-white rounded-md p-2 shadow-md flex-1 md:flex-initial ">
-              <MagnifyingGlassIcon className="w-6 h-6 text-gray-400" />
+            <form className="flex items-center space-x-5 bg-zinc-700/50 border border-zinc-500 rounded-md px-1 shadow-md flex-1 md:flex-initial ">
+              <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search"
-                className="flex-1 outline-none p-2"
+                className="flex-1 outline-none px-2 py-1 bg-transparent text-zinc-300"
               />
               <button type="submit" hidden>
                 Search
               </button>
             </form>
             {/*Sample Avatar*/}
-            <Avatar name="Jared Tucker" round size="40" color="#0055D1" />
+            <Avatar name="Jared Tucker" round size="32" color="#0055D1" />
           </div>
         </div>
       </header>
 
-      <div className="container min-h-full mx-auto">
+      <div className="">
         {children ? children : <Outlet></Outlet>}
       </div>
       {/* Other layout elements */}

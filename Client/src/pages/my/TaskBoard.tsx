@@ -1,16 +1,15 @@
 import React, { useEffect } from "react";
-import DashboardBoard from "../../Components/Dashboard/Board/DashboardBoard";
+import TaskBoardComp from "../../Components/Task/Board/Taskboard";
 
 import { useParams } from "react-router-dom";
+import BoardHeader from "../../Components/Task/Board/BoardHeader";
 function TaskBoard() {
   const { group } = useParams();
-  useEffect(() => {
-    console.log(group);
-  }, []);
-  return (
-    <div>
 
-      <DashboardBoard />
+  return (
+    <div className="">
+      <BoardHeader code={group}/>    
+      <TaskBoardComp />
     </div>
   );
 }

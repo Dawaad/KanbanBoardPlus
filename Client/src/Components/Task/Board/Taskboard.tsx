@@ -3,7 +3,7 @@ import { useState } from "react";
 import { DragDropContext, DropResult, Droppable } from "react-beautiful-dnd";
 import BoardColumn from "./BoardColumn";
 
-function DashboardBoard() {
+function TaskBoardComp() {
   const colMap = new Map();
   colMap.set("To Do", ["Task 1", "Task 2", "Task 3", "Task 4", "Task 5"]);
   colMap.set("In Progress", [
@@ -17,7 +17,6 @@ function DashboardBoard() {
   colMap.set("Done", ["Task 11", "Task 12", "Task 13", "Task 14", "Task 15"]);
 
   const [columns, setColumns] = useState(colMap);
-
 
   const handleOnDragEnd = (result: DropResult) => {
     const { destination, source, type } = result;
@@ -93,7 +92,6 @@ function DashboardBoard() {
                   column={column}
                   index={index}
                   tasks={columns.get(column)}
-                 
                 />
               );
             })}
@@ -104,4 +102,4 @@ function DashboardBoard() {
   );
 }
 
-export default DashboardBoard;
+export default TaskBoardComp;

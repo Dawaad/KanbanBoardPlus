@@ -30,11 +30,11 @@ function BoardColumn({
               <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
-                className={`p-2 rounded-2xl shadow-md shadow-zinc-500 ${
-                  snapshot.isDraggingOver ? "bg-green-200" : "bg-white/50 flex-1 md:w-72  "
+                className={`p-2 rounded-2xl shadow-md shadow-zinc-500 dark:shadow-none ${
+                  snapshot.isDraggingOver ? "bg-green-200 dark:bg-green-400/80" : "bg-white/50 dark:bg-zinc-800/80 flex-1 md:w-72  "
                 }`}
               >
-                <h2 className="flex justify-between font-bold text-xl px-2 py-1">
+                <h2 className="flex justify-between font-bold text-xl px-2 py-1 dark:text-zinc-300">
                   {column}
                 </h2>
                 <div className="space-y-2">

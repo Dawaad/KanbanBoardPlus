@@ -7,8 +7,9 @@ function TaskBoard() {
   const { group } = useParams();
 
   return (
-    <div className="">
-      <BoardHeader code={group}/>    
+    <div className="overflow-y-hidden">
+      <div className="absolute w-full  h-[50rem] bg-gradient-to-br from-pink-400 to-blue-500 dark:from-purple-400 dark:to-red-600 rounded-md filter blur-3xl opacity-60 -z-10"></div>
+      <BoardHeader code={group} />
       <TaskBoardComp />
     </div>
   );

@@ -80,7 +80,7 @@ function TaskBoardComp() {
       <Droppable droppableId="board" direction="horizontal" type="column">
         {(provided) => (
           <div
-            className="grid grid-cols-1  md:flex gap-5  mx-16 py-8 "
+            className="grid grid-cols-1  md:flex gap-5  mx-16 py-8"
             {...provided.droppableProps}
             ref={provided.innerRef}
           >

@@ -15,7 +15,7 @@ const Error = React.lazy(() => import("./pages/Error"));
 //Initialising routes with correct corresponding components
 const routes = (
   <>
-    <Route>
+    <Route element={<Layout/>}>
       <Route index element={<Home />} />
       <Route path="/login" element={<Login />} />
     </Route>

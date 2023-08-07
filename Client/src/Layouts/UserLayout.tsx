@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, Outlet } from "react-router-dom";
 import Avatar from "react-avatar";
 import {
@@ -30,11 +30,23 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
     }
   };
 
+  useEffect(() => {
+    if (html) {
+      if (userTheme === "dark" || systemTheme === "dark") {
+        html.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      } else {
+        html.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+      }
+    }
+  }, []);
+
   return (
-    <div className="">
+    <div className="overflow-y-hidden">
       {/* Your common layout elements */}
       <header>
-        <div className="flex flex-col md:flex-row items-center px-5 py-3 border-b border-b-slate-400">
+        <div className="flex flex-col md:flex-row items-center px-5 py-3 border-b border-b-slate-400 dark:border-b-slate-500">
           {/*Title*/}
           <Link
             to={"/"}
@@ -65,7 +77,13 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
               <MoonIcon className="w-6 h-6 block dark:hidden" />
             </button>
             {/*Sample Avatar*/}
-            <Avatar className="cursor-pointer" name="Jared Tucker" round size="28" color="#0055D1" />
+            <Avatar
+              className="cursor-pointer"
+              name="Jared Tucker"
+              round
+              size="28"
+              color="#0055D1"
+            />
           </div>
         </div>
       </header>

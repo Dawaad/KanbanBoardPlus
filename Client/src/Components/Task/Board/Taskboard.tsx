@@ -5,6 +5,8 @@ import BoardColumn from "./BoardColumn";
 
 function TaskBoardComp() {
   const colMap = new Map();
+  colMap.set("Backlogged", ["Task 1", "Task 2", "Task 3", "Task 4", "Task 5"]);
+  colMap.set("Planning", ["Task 1", "Task 2", "Task 3", "Task 4", "Task 5"]);
   colMap.set("To Do", ["Task 1", "Task 2", "Task 3", "Task 4", "Task 5"]);
   colMap.set("In Progress", [
     "Task 6",
@@ -80,7 +82,7 @@ function TaskBoardComp() {
       <Droppable droppableId="board" direction="horizontal" type="column">
         {(provided) => (
           <div
-            className="grid grid-cols-1  md:flex gap-5  mx-16 py-8"
+            className="grid grid-cols-1 md:flex gap-5  mx-16 py-8"
             {...provided.droppableProps}
             ref={provided.innerRef}
           >
@@ -95,6 +97,9 @@ function TaskBoardComp() {
                 />
               );
             })}
+            <div className="px-5">
+
+            </div>
           </div>
         )}
       </Droppable>

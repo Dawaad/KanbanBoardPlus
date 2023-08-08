@@ -79,6 +79,7 @@ function TaskBoardComp() {
   return (
     <DragDropContext onDragEnd={handleOnDragEnd}>
       {/*Board*/}
+ 
       <Droppable droppableId="board" direction="horizontal" type="column">
         {(provided) => (
           <div
@@ -97,9 +98,7 @@ function TaskBoardComp() {
                 />
               );
             })}
-            <div className="px-5">
-
-            </div>
+            <div className="px-5"></div>
           </div>
         )}
       </Droppable>

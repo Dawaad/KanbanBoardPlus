@@ -45,8 +45,8 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
   return (
     <div className="overflow-y-hidden">
       {/* Your common layout elements */}
-      <header>
-        <div className="flex flex-col md:flex-row items-center px-5 py-3 border-b border-b-slate-400 dark:border-b-slate-500">
+      <header className="h-[6vh] bg-zinc-200/40 dark:bg-zinc-800/50">
+        <div className="flex flex-col md:flex-row items-center px-5 py-3 ">
           {/*Title*/}
           <Link
             to={"/"}
@@ -88,7 +88,7 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
         </div>
       </header>
 
-      <div className="">{children ? children : <Outlet></Outlet>}</div>
+      <div>{children ? children : <Outlet></Outlet>}</div>
       {/* Other layout elements */}
     </div>
   );

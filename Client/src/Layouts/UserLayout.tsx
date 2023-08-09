@@ -43,19 +43,65 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
   }, []);
 
   return (
-    <div className="overflow-y-hidden">
+    <div className="overflow-y-hidden h-screen">
       {/* Your common layout elements */}
-      <header className="h-[6vh] bg-zinc-200/40 dark:bg-zinc-800/50 border-b border-b-zinc-600/60  dark:border-b-zinc-400/60">
+      <header className="h-[3.75rem] bg-zinc-200/40 dark:bg-zinc-800/50 border-b border-b-zinc-600/60  dark:border-b-zinc-400/60">
         <div className="flex flex-col md:flex-row items-center px-5 py-3 ">
           {/*Title*/}
           <Link
             to={"/"}
-            className="text-2xl text-zinc-800/90 dark:text-zinc-300 font-bold pb-10 md:pb-0"
+            id="nav-logo"
+            className=" h-fit text-3xl font-extrabold flex group cursor-pointer text-zinc-800/80 dark:text-zinc-200/80 "
           >
-            Kanban Board
+            <div className="flex">
+              <p>K</p>
+              {["a", "n", "b", "a", "n"].map((letter, index) => {
+                return (
+                  <p
+                    key={letter}
+                    className={`scale-0  group-hover:scale-100 origin-bottom`}
+                    style={{ transition: `${200 + 200 * index}ms` }}
+                  >
+                    {letter}
+                  </p>
+                );
+              })}
+              <div className="flex transition-all duration-1000 group-hover:duration-700 -translate-x-full group-hover:-translate-x-0 group-hover:mx-2">
+                <p>B</p>
+                {["o", "a", "r", "d"].map((letter, index) => {
+                  return (
+                    <p
+                      key={letter}
+                      className={`scale-0  group-hover:scale-100 origin-bottom `}
+                      style={{ transition: `${200 + 200 * index}ms ` }}
+                    >
+                      {letter}
+                    </p>
+                  );
+                })}
+                
+              </div>
+                <div className="flex transition-all -translate-x-[9.8rem] group-hover:-translate-x-0 duration-1000 group-hover:duration-700 ">
+                  <p className="block group-hover:hidden text-xl">+</p>
+                  <div className="flex text-3xl">
+                  {["P", "l", "u", "s"].map((letter, index) => {
+                  return (
+                    <p
+                      key={letter}
+                      className={`scale-0  group-hover:scale-100 origin-bottom `}
+                      style={{ transition: `${200 + 200 * index}ms ` }}
+                    >
+                      {letter}
+                    </p>
+                  );
+                })}
+                  </div>
+                </div>
+            </div>
           </Link>
           {/*Search Bar*/}
           <div className="flex items-center space-x-5  flex-1 justify-end w-full">
+           
             <form className="flex items-center space-x-5 dark:bg-zinc-700/50 border border-zinc-500 rounded-md px-1 shadow-md flex-1 md:flex-initial ">
               <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
               <input

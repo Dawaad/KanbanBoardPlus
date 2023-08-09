@@ -45,12 +45,12 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
   return (
     <div className="overflow-y-hidden">
       {/* Your common layout elements */}
-      <header className="h-[6vh] bg-zinc-200/40 dark:bg-zinc-800/50">
+      <header className="h-[6vh] bg-zinc-200/40 dark:bg-zinc-800/50 border-b border-b-zinc-600/60  dark:border-b-zinc-400/60">
         <div className="flex flex-col md:flex-row items-center px-5 py-3 ">
           {/*Title*/}
           <Link
             to={"/"}
-            className="text-2xl text-zinc-800 dark:text-zinc-300 font-bold pb-10 md:pb-0"
+            className="text-2xl text-zinc-800/90 dark:text-zinc-300 font-bold pb-10 md:pb-0"
           >
             Kanban Board
           </Link>
@@ -68,7 +68,7 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
               </button>
             </form>
             <button
-              className="hover:scale-110 transition-all text-zinc-800 dark:text-zinc-300 hover:text-slate-500"
+              className="hover:scale-110 transition-all text-zinc-800/90 dark:text-zinc-300 hover:text-slate-500"
               onClick={() => {
                 themeSwitch();
               }}

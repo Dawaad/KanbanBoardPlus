@@ -23,7 +23,7 @@ const users = [
 ];
 function TaskSideBar() {
   return (
-    <aside className="w-[3rem] hover:w-[20rem] bg-zinc-200/40 dark:bg-zinc-800/50  transition-all  ">
+    <aside className="w-[3rem] hover:w-[25rem] bg-zinc-200/40 dark:bg-zinc-800/50  transition-all  ">
       <section
         className="py-4 border-b border-b-zinc-600/60 dark:border-b-zinc-400/60"
         id="section-social"

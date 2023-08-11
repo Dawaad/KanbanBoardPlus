@@ -46,6 +46,7 @@ function TaskSideBar() {
             {users.slice(0, 4).map((user: string, index: number) => {
               return (
                 <Avatar
+                  key={user}
                   className="cursor-pointer"
                   round
                   size="32"

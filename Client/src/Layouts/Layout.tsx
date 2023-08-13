@@ -71,7 +71,7 @@ function Layout({ children }: { children: React.ReactNode }) {
                   );
                 })}
               </div>
-              <div className="flex transition-all -translate-x-[9.8rem] group-hover:-translate-x-0 duration-1000 group-hover:duration-700 ">
+              <div className="flex transition-all -translate-x-[9.5rem] group-hover:-translate-x-0 duration-1000 group-hover:duration-700 ">
                 <p className="block group-hover:hidden text-xl">+</p>
                 <div className="flex text-3xl">
                   {["P", "l", "u", "s"].map((letter, index) => {

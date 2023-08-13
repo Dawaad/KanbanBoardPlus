@@ -26,7 +26,7 @@ function Login() {
   return (
     <>
       <div
-        className="relative overflow-hidden h-[45rem] md:h-[50rem] lg:h-[60rem]"
+        className="relative overflow-hidden h-[40rem] md:h-[50rem] lg:h-[55rem]"
         id="container"
       >
         <div

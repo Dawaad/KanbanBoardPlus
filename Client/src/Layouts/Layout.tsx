@@ -98,13 +98,13 @@ function Layout({ children }: { children: React.ReactNode }) {
               Login
             </Link>
             <button
-              className="hover:scale-110 transition-all text-zinc-800/90 dark:text-zinc-300 hover:text-slate-500"
+              className=" transition-all pr-4 flex items-center group"
               onClick={() => {
                 themeSwitch();
               }}
             >
-              <SunIcon className="w-6 h-6 hidden dark:block" />
-              <MoonIcon className="w-6 h-6 block dark:hidden" />
+              <SunIcon className=" dark_sun sun hover_light_sun hover_dark_sun  " />
+              <MoonIcon className=" moon dark_moon hover_light_moon hover_dark_moon " />
             </button>
           </div>
         </div>

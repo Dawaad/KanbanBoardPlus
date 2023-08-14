@@ -79,29 +79,27 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
                     </p>
                   );
                 })}
-                
               </div>
-                <div className="flex transition-all -translate-x-[9.5rem] group-hover:-translate-x-0 duration-1000 group-hover:duration-700 ">
-                  <p className="block group-hover:hidden text-xl">+</p>
-                  <div className="flex text-3xl">
+              <div className="flex transition-all -translate-x-[9.5rem] group-hover:-translate-x-0 duration-1000 group-hover:duration-700 ">
+                <p className="block group-hover:hidden text-xl">+</p>
+                <div className="flex text-3xl">
                   {["P", "l", "u", "s"].map((letter, index) => {
-                  return (
-                    <p
-                      key={letter}
-                      className={`scale-0  group-hover:scale-100 origin-bottom `}
-                      style={{ transition: `${200 + 200 * index}ms ` }}
-                    >
-                      {letter}
-                    </p>
-                  );
-                })}
-                  </div>
+                    return (
+                      <p
+                        key={letter}
+                        className={`scale-0  group-hover:scale-100 origin-bottom `}
+                        style={{ transition: `${200 + 200 * index}ms ` }}
+                      >
+                        {letter}
+                      </p>
+                    );
+                  })}
                 </div>
+              </div>
             </div>
           </Link>
           {/*Search Bar*/}
           <div className="flex items-center space-x-5  flex-1 justify-end w-full">
-           
             <form className="flex items-center space-x-5 dark:bg-zinc-700/50 border border-zinc-500 rounded-md px-1 shadow-md flex-1 md:flex-initial ">
               <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
               <input
@@ -114,13 +112,13 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
               </button>
             </form>
             <button
-              className="hover:scale-110 transition-all text-zinc-800/90 dark:text-zinc-300 hover:text-slate-500"
+              className=" transition-all pr-4 flex items-center group"
               onClick={() => {
                 themeSwitch();
               }}
             >
-              <SunIcon className="w-6 h-6 hidden dark:block" />
-              <MoonIcon className="w-6 h-6 block dark:hidden" />
+              <SunIcon className=" dark_sun sun hover_light_sun hover_dark_sun  " />
+              <MoonIcon className=" moon dark_moon hover_light_moon hover_dark_moon " />
             </button>
             {/*Sample Avatar*/}
             <Avatar

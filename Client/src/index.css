@@ -16,7 +16,36 @@
     overflow: hidden;
 }
 
+.dark_moon{
+ @apply dark:w-8 dark:h-8 dark:translate-x-0 dark:translate-y-0 dark:text-yellow-100 dark:z-[3]
+}
 
+.dark_sun{
+ @apply dark:w-4 dark:h-4  dark:translate-y-2 dark:text-zinc-400 dark:z-[2]
+}
+
+.sun{
+ @apply w-8 h-8  text-yellow-600  z-[3] transition-all
+}
+
+.moon{
+ @apply w-3 h-4  text-zinc-500  translate-y-2   z-[2] transition-all
+}
+
+.hover_dark_sun{
+    @apply dark:group-hover:w-8 dark:group-hover:text-yellow-600 dark:group-hover:h-8  dark:group-hover:translate-y-0
+}
+
+.hover_dark_moon{
+    @apply dark:group-hover:w-3 dark:group-hover:h-4 dark:group-hover:text-zinc-500 dark:group-hover:translate-y-2
+}
+
+.hover_light_sun{
+    @apply group-hover:w-4 group-hover:text-zinc-400 group-hover:h-4 group-hover:translate-y-2
+}
+.hover_light_moon{
+    @apply group-hover:w-8 group-hover:h-8 group-hover:text-yellow-100 group-hover:translate-y-0
+}
 
 
 
@@ -30,7 +59,7 @@
     
     opacity: 1;
     z-index: 5;
-    animation: show 0.2s;
+    animation: show 0.25s;
 }
 
 @keyframes show {

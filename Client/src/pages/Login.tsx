@@ -78,6 +78,11 @@ function Login() {
               type="password"
               placeholder="Password"
             />
+            <input
+              className="p-3 bg-zinc-300/70 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
+              type="password"
+              placeholder="Confirm Password"
+            />
 
             <div className="space-y-2 flex flex-col justify-center items-center group pt-4">
               <button className=" rounded-2xl bg-gradient-to-tr from-blue-400 to-blue-900 text-zinc-200 mb-2 py-3 px-11 uppercase transition-all hover:scale-[1.02]">

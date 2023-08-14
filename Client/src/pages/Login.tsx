@@ -1,10 +1,38 @@
 import React from "react";
 import { useState } from "react";
-import { BsFacebook, BsLinkedin, BsGithub } from "react-icons/bs";
+import { BsFacebook, BsLinkedin, BsGithub, BsGoogle } from "react-icons/bs";
+import {
+  GoogleAuthProvider,
+  GithubAuthProvider,
+  getAuth,
+  signInWithPopup,
+  signInWithCredential,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import ISignIn from "../Interfaces/ISignIn";
+import ISignUp from "../Interfaces/ISignUp";
 
 function Login() {
-  const [login, setLogin] = useState<boolean>(true);
+  //React States and UseEffect Hooks
+  const [signUpData, setSignUpData] = useState<ISignUp>({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [signInData, setSignInData] = useState<ISignIn>({
+    email: "",
+    password: "",
+  });
+  //Routing upon successful login
+  const navigate = useNavigate();
 
+  //Switching between sign in and sign up
   const switchLoginClick = () => {
     document
       .getElementById("container")
@@ -14,46 +42,122 @@ function Login() {
     document.getElementById("container")?.classList.add("right-panel-active");
   };
 
-  const socialMediaSignIn =
-    (/*Idk maybe add enums here (FB/Github/Linkedin)???*/) => {};
+  //Firebase Auth
+  const auth = getAuth();
 
-  const emailSignIn = () => {};
+  //Signin functions (3rd party will handle both signin and signup)
 
-  const emailSignUp = () => {};
+  const googleSignIn = async () => {
+   
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+      .then((res) => {
+        //Retrieving Google Access Token to Access Google API
+        const credentials = GoogleAuthProvider.credentialFromResult(res);
+        const token = credentials?.accessToken;
 
-  const socialMediaSignUp = () => {};
+        //Retrieving User Info
+        const user = res.user;
+
+        //Send current user info to backend/redux store
+
+        //Redirect to Dashboard
+        navigate("/my", { replace: true });
+      })
+      .catch((err) => {
+        console.log(err);
+        //Handle errors here
+      });
+  };
+
+  const githubSignIn = async () => {};
+  const emailSignIn = async () => {
+    signInWithEmailAndPassword(auth, signInData.email, signInData.password).then((userCred) => {
+      // Signed in 
+      const user = userCred.user;
+      // ...
+    })
+
+  };
+  const facebookSignIn = async () => {};
+
+  //Signup functions
+  const emailSignUp = async (
+    credential: React.FormEvent<HTMLFormElement>
+  ) => {
+    createUserWithEmailAndPassword(auth, signUpData.email, signUpData.password).then((userCred) => {
+      // Signed in 
+      const user = userCred.user;
+      if(user){
+        updateProfile(user, {
+          displayName: signUpData.name
+        }).then(() => {
+
+          //Call Axios and deal with this
+
+          //Navigate to Dashboard
+          navigate("/my", { replace: true });
+        })
+      }
+      // ...
+
+    })
+
+
+  };
+
+
+  //Really quick validation for sign up details - will change later
+  const signUpDetailValidation = (
+    e: React.FormEvent<HTMLFormElement>
+  ): boolean => {
+    e.preventDefault();
+    return (
+      signUpData.name.length > 0 &&
+      signUpData.email.length > 0 &&
+      signUpData.password.length > 7 &&
+      signUpData.confirmPassword.length > 7 &&
+      signUpData.password === signUpData.confirmPassword
+    );
+  };
 
   return (
     <>
       <div
-        className="relative overflow-hidden h-[40rem] md:h-[50rem] lg:h-[55rem]"
+        className="relative overflow-hidden h-[40rem] md:h-[55rem] lg:h-[57rem]"
         id="container"
       >
         <div
-          className=" absolute top-0 bg-zinc-200 dark:bg-zinc-800 h-full transition-transform duration-[300ms] -left-1/3 w-2/3 opacity-0 z-[1] flex justify-center"
+          className="absolute top-0 bg-zinc-200 dark:bg-zinc-800 h-full transition-transform duration-[300ms] -left-1/3 w-2/3 opacity-0 z-[1] flex justify-center"
           id="sign-up-container"
         >
           <form
-            action="#"
+            onSubmit={(e) => {
+              if (signUpDetailValidation(e)) {
+                emailSignUp(e);
+              }
+            }}
             className="flex justify-center items-center flex-col px-12 text-center h-full w-1/2"
           >
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-800/80 dark:text-zinc-200">
               Sign Up
             </h1>
             <div className="my-5 flex space-x-8">
-              <a href="#" className="w-12 h-12 text-[45px] text-blue-600 ">
-                <BsFacebook />
-              </a>
-              <a
-                href="#"
-                className="text-[45px] text-zinc-800/80 dark:text-zinc-200"
+              <button
+                onClick={() => {
+                  googleSignIn();
+                }}
+                className="w-12 h-12 text-[45px] text-zinc-800/80 dark:text-zinc-200 "
               >
+                <BsGoogle />
+              </button>
+              <button className="text-[45px] text-zinc-800/80 dark:text-zinc-200">
                 <BsGithub />
-              </a>
+              </button>
 
-              <a href="#" className="text-[45px] text-blue-600">
+              <button className="text-[45px] text-zinc-800/80 dark:text-zinc-200">
                 <BsLinkedin />
-              </a>
+              </button>
             </div>
             <div className=" p-4 flex w-full items-center">
               <p className="h-[1px] bg-zinc-800/80 dark:bg-zinc-200 w-full"></p>
@@ -64,24 +168,43 @@ function Login() {
             </div>
 
             <input
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setSignUpData({ ...signUpData, name: e.target.value });
+              }}
               className="p-3 bg-zinc-300/90 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
               type="text"
               placeholder="Name"
+              name="name"
             />
             <input
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setSignUpData({ ...signUpData, email: e.target.value });
+              }}
               className="p-3 bg-zinc-300/90 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
               type="email"
               placeholder="Email"
+              name="email"
             />
             <input
-              className="p-3 bg-zinc-300/70 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setSignUpData({ ...signUpData, password: e.target.value });
+              }}
+              className={`p-3 bg-zinc-300/70 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800  `}
               type="password"
               placeholder="Password"
+              name="password"
             />
             <input
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setSignUpData({
+                  ...signUpData,
+                  confirmPassword: e.target.value,
+                });
+              }}
               className="p-3 bg-zinc-300/70 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
               type="password"
               placeholder="Confirm Password"
+              name="confirmPassword"
             />
 
             <div className="space-y-2 flex flex-col justify-center items-center group pt-4">
@@ -107,19 +230,21 @@ function Login() {
               Login to Your Account
             </h1>
             <div className="my-5 flex space-x-8">
-              <a href="#" className="w-12 h-12 text-[45px] text-blue-600 ">
-                <BsFacebook />
-              </a>
-              <a
-                href="#"
-                className="text-[45px] text-zinc-800/80 dark:text-zinc-200"
+              <button
+                onClick={() => {
+                  googleSignIn();
+                }}
+                className="w-12 h-12 text-[45px] text-zinc-800/80 dark:text-zinc-200 "
               >
+                <BsGoogle />
+              </button>
+              <button className="text-[45px] text-zinc-800/80 dark:text-zinc-200">
                 <BsGithub />
-              </a>
+              </button>
 
-              <a href="#" className="text-[45px] text-blue-600">
+              <button className="text-[45px] text-zinc-800/80 dark:text-zinc-200">
                 <BsLinkedin />
-              </a>
+              </button>
             </div>
             <div className=" p-4 flex w-full items-center">
               <p className="h-[1px] bg-zinc-800/80 dark:bg-zinc-200 w-full"></p>
@@ -129,21 +254,24 @@ function Login() {
               <p className="h-[1px] bg-zinc-800 dark:bg-zinc-200 w-full"></p>
             </div>
             <input
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setSignInData({ ...signInData, email: e.target.value });
+              }}
               className="p-3 bg-zinc-300/90 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
               type="email"
               placeholder="Email"
             />
             <input
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setSignInData({ ...signInData, password: e.target.value });
+              }}
               className="p-3 bg-zinc-300/70 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
               type="password"
               placeholder="Password"
             />
-            <a
-              className="p-4 text-zinc-700 dark:text-zinc-500 hover:underline hover:dark:text-zinc-400"
-              href="#"
-            >
+            <button className="p-4 text-zinc-700 dark:text-zinc-500 hover:underline hover:dark:text-zinc-400">
               Forgot your password?
-            </a>
+            </button>
             <div className="space-y-2 flex flex-col justify-center items-center group">
               <button className=" rounded-2xl bg-gradient-to-tr from-blue-400 to-blue-900 text-zinc-200 mb-2 py-3 px-11 uppercase transition-all hover:scale-[1.02]">
                 Sign In
@@ -156,7 +284,7 @@ function Login() {
           </form>
         </div>
         <div
-          className="absolute top-0 left-2/3 w-1/3 h-full overflow-hidden transition-transform duration-300 z-[100]"
+          className="absolute top-0 left-2/3 w-1/3 h-[60rem]  overflow-hidden transition-transform duration-300 z-[100]"
           id="overlay-container"
         >
           <div

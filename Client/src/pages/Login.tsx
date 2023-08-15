@@ -10,6 +10,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
+  Auth,
 } from "firebase/auth";
 
 import axios from "axios";
@@ -42,70 +43,75 @@ function Login() {
     document.getElementById("container")?.classList.add("right-panel-active");
   };
 
-  //Firebase Auth
-  const auth = getAuth();
-
   //Signin functions (3rd party will handle both signin and signup)
 
   const googleSignIn = async () => {
-   
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((res) => {
-        //Retrieving Google Access Token to Access Google API
-        const credentials = GoogleAuthProvider.credentialFromResult(res);
-        const token = credentials?.accessToken;
+    axios.get("http://localhost:3000/api/auth/get_auth").then((res) => {
+      const auth: Auth = res.data;
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider)
+        .then((res) => {
+          //Retrieving Google Access Token to Access Google API
+          const credentials = GoogleAuthProvider.credentialFromResult(res);
+          const token = credentials?.accessToken;
 
-        //Retrieving User Info
-        const user = res.user;
+          //Retrieving User Info
+          const user = res.user;
 
-        //Send current user info to backend/redux store
+          //Send current user info to backend/redux store
 
-        //Redirect to Dashboard
-        navigate("/my", { replace: true });
-      })
-      .catch((err) => {
-        console.log(err);
-        //Handle errors here
-      });
+          //Redirect to Dashboard
+          navigate("/my", { replace: true });
+        })
+        .catch((err) => {
+          console.log(err);
+          //Handle errors here
+        });
+    });
   };
 
   const githubSignIn = async () => {};
   const emailSignIn = async () => {
-    signInWithEmailAndPassword(auth, signInData.email, signInData.password).then((userCred) => {
-      // Signed in 
-      const user = userCred.user;
-      // ...
-    })
-
+    axios
+      .post("http://localhost:3000/api/auth/email_login", {
+        user: {
+          email: signInData.email,
+          password: signInData.password,
+        },
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          //Update Redux Store
+          console.log("yipee!");
+          //Navigate to Dashboard
+          navigate("/my");
+        }
+      });
   };
   const facebookSignIn = async () => {};
 
   //Signup functions
-  const emailSignUp = async (
-    credential: React.FormEvent<HTMLFormElement>
-  ) => {
-    createUserWithEmailAndPassword(auth, signUpData.email, signUpData.password).then((userCred) => {
-      // Signed in 
-      const user = userCred.user;
-      if(user){
-        updateProfile(user, {
-          displayName: signUpData.name
-        }).then(() => {
+  const emailSignUp = async () => {
+    axios
+      .post("http://localhost:3000/api/create_user", {
+        user: {
+          name: signUpData.name,
+          email: signUpData.email,
+          password: signUpData.password,
+        },
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          //Update Redux Store with Current User
 
-          //Call Axios and deal with this
-
-          //Navigate to Dashboard
-          navigate("/my", { replace: true });
-        })
-      }
-      // ...
-
-    })
-
-
+          //Navigate to dashboard
+          navigate("/my");
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
-
 
   //Really quick validation for sign up details - will change later
   const signUpDetailValidation = (
@@ -134,7 +140,7 @@ function Login() {
           <form
             onSubmit={(e) => {
               if (signUpDetailValidation(e)) {
-                emailSignUp(e);
+                emailSignUp();
               }
             }}
             className="flex justify-center items-center flex-col px-12 text-center h-full w-1/2"
@@ -273,7 +279,12 @@ function Login() {
               Forgot your password?
             </button>
             <div className="space-y-2 flex flex-col justify-center items-center group">
-              <button className=" rounded-2xl bg-gradient-to-tr from-blue-400 to-blue-900 text-zinc-200 mb-2 py-3 px-11 uppercase transition-all hover:scale-[1.02]">
+              <button
+                onClick={() => {
+                  emailSignIn();
+                }}
+                className=" rounded-2xl bg-gradient-to-tr from-blue-400 to-blue-900 text-zinc-200 mb-2 py-3 px-11 uppercase transition-all hover:scale-[1.02]"
+              >
                 Sign In
               </button>
 

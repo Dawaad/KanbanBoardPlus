@@ -148,9 +148,9 @@ app.delete("/api/tasks/:taskId", (req: Request, res: Response) => {
 // update task by id
 app.put("/api/tasks/:taskId", (req: Request, res: Response) => {
   const taskRef = doc(db ,'tasks', req.params.taskId);
-  const newTaskData: TaskData = req.body.task;
+  const taskChanges = req.body.task;
 
-  updateDoc(taskRef, newTaskData).then(() => {
+  updateDoc(taskRef, taskChanges).then(() => {
       console.log("Document successfully updated!");
     }).catch((error) => {
       console.error("Error updating document: ", error);

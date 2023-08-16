@@ -109,11 +109,11 @@ app.get("/api/users/:userId", (req: Request, res: Response) => {
 // create task
 app.post("/api/tasks", (req: Request, res: Response) => {
   const taskData: TaskData = req.body.task;
-  const docRef = doc(db, "tasks", req.body.task.id);
-  setDoc(docRef, taskData).then(() => {
-    console.log("Document written with ID: ", req.body.task.id);
+  
+  addDoc(collection(db, "tasks"), taskData).then(() => {
+    console.log("Document successfully written!");
   }).catch((error) => {
-    console.error("Error adding document: ", error);
+    console.error("Error writing document: ", error);
   });
 });
 

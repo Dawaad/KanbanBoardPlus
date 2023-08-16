@@ -46,14 +46,15 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
     <div className="overflow-y-hidden h-screen">
       {/* Your common layout elements */}
       <header className="h-[3.75rem] bg-zinc-200/40 dark:bg-zinc-800/50 border-b border-b-zinc-600/60  dark:border-b-zinc-400/60">
-        <div className="flex flex-col md:flex-row items-center px-5 py-3 ">
+        <div className="flex flex-row items-center px-5 py-3 ">
           {/*Title*/}
           <Link
             to={"/"}
             id="nav-logo"
-            className=" h-fit text-3xl font-extrabold flex group cursor-pointer text-zinc-800/80 dark:text-zinc-200/80 "
+            className=" h-fit  text-2xl md:text-3xl font-extrabold flex group cursor-pointer text-zinc-800/80 dark:text-zinc-200/80 "
           >
-            <div className="flex">
+            <div className="flex md:hidden">KB+</div>
+            <div className="hidden md:flex">
               <p>K</p>
               {["a", "n", "b", "a", "n"].map((letter, index) => {
                 return (
@@ -100,7 +101,7 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
           </Link>
           {/*Search Bar*/}
           <div className="flex items-center space-x-5  flex-1 justify-end w-full">
-            <form className="flex items-center space-x-5 dark:bg-zinc-700/50 border border-zinc-500 rounded-md px-1 shadow-md flex-1 md:flex-initial ">
+            <form className="hidden md:flex items-center space-x-5 dark:bg-zinc-700/50 border border-zinc-500 rounded-md px-1 shadow-md flex-1 md:flex-initial ">
               <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
               <input
                 type="text"

@@ -56,7 +56,8 @@ app.post("/api/auth/email_login", (req: Request, res: Response) => {
         res.status(200).send(user);
       })
       .catch((error) => {
-        res.status(401).send(error);
+        // res.status(401).send(error.message)
+        console.log(error.message);
       });
   }
 });
@@ -67,25 +68,29 @@ app.post("/api/auth/create_user", (req: Request, res: Response) => {
   const { name, email, password } = req.body.user;
 
   if (name && email && password) {
-    createUserWithEmailAndPassword(auth, email, password).then((userCred) => {
-      const user = userCred.user;
-      updateProfile(user, { displayName: name }).then(() => {
-        const firebaseUser: TUser = {
-          uid: user.uid,
-          email: user.email ? user.email : "",
-          displayName: user.displayName ? user.displayName : "New User",
-          photoURL: user.photoURL ? user.photoURL : "",
-        };
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCred) => {
+        const user = userCred.user;
+        updateProfile(user, { displayName: name }).then(() => {
+          const firebaseUser: TUser = {
+            uid: user.uid,
+            email: user.email ? user.email : "",
+            displayName: user.displayName ? user.displayName : "New User",
+            photoURL: user.photoURL ? user.photoURL : "",
+          };
 
-        try {
-          const docRef = addDoc(collection(db, "users"), firebaseUser);
-          res.status(200).send(user);
-        } catch (e) {
-          // console.error("Error adding document: ", e);
-          res.status(500).send("Error creating user");
-        }
+          try {
+            const docRef = addDoc(collection(db, "users"), firebaseUser);
+            res.status(200).send(user);
+          } catch (e) {
+            // console.error("Error adding document: ", e);
+            res.status(500).send("Error creating user");
+          }
+        });
+      })
+      .catch((error) => {
+        res.status(500).send(error);
       });
-    });
   }
 });
 

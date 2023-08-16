@@ -11,7 +11,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDoc, doc, DocumentSnapshot } from "firebase/firestore";
 import { get } from "http";
 
 dotenv.config();
@@ -88,6 +88,23 @@ app.post("/api/auth/create_user", (req: Request, res: Response) => {
     });
   }
 });
+
+
+// Tiny little check to see if get user works 
+app.get("/api/users/:id", (req: Request, res: Response) => {
+  const userRef = doc(db ,'users', req.params.id);
+
+  getDoc(userRef).then((userSnap: DocumentSnapshot) => {
+    if (userSnap.exists()) {
+      // send user data here
+      const userData: UserData = userSnap.data();
+      console.log("User data:", userData);
+    } else {
+      console.log("No such user!");
+    }
+  });
+})
+
 
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);

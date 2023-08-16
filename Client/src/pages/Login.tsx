@@ -93,7 +93,7 @@ function Login() {
   //Signup functions
   const emailSignUp = async () => {
     axios
-      .post("http://localhost:3000/api/create_user", {
+      .post("http://localhost:3000/api/auth/create_user", {
         user: {
           name: signUpData.name,
           email: signUpData.email,
@@ -109,6 +109,7 @@ function Login() {
         }
       })
       .catch((err) => {
+        // console.log(err);
         console.log(err);
       });
   };

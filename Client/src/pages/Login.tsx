@@ -243,7 +243,7 @@ function Login() {
                 onClick={() => {
                   googleSignIn();
                 }}
-                className="text-[45px] text-zinc-800/80 dark:text-zinc-200"
+                className="text-[45px] text-zinc-800/80 dark:text-zinc-200 hover:text-zinc-500 hover:dark:text-zinc-400"
               >
                 <BsGoogle />
               </button>

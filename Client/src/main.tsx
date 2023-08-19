@@ -26,6 +26,7 @@ const TaskBoard = React.lazy(() => import("./pages/my/TaskBoard"));
 const Login = React.lazy(() => import("./pages/Login"));
 const Home = React.lazy(() => import("./pages/Home"));
 const Error = React.lazy(() => import("./pages/Error"));
+const LoginError = React.lazy(() => import("./pages/LoginError"));
 //Initialising routes with correct corresponding components
 const routes = (
   <>
@@ -37,6 +38,7 @@ const routes = (
       <Route index element={<Dashboard />} />
       <Route path="board/:group" element={<TaskBoard />} />
     </Route>
+    <Route path="/loginerror" element={<LoginError />} />
     <Route path="*" element={<Error />} />
   </>
 );

@@ -1,5 +1,6 @@
 import React from "react";
 import { useState } from "react";
+import { TUser } from "../Types/FirebaseTypes";
 import { BsFacebook, BsLinkedin, BsGithub, BsGoogle } from "react-icons/bs";
 import {
   GoogleAuthProvider,
@@ -43,73 +44,69 @@ function Login() {
     document.getElementById("container")?.classList.add("right-panel-active");
   };
 
+  const auth = getAuth();
+
   //Signin functions (3rd party will handle both signin and signup)
 
   const googleSignIn = async () => {
-    axios.get("http://localhost:3000/api/auth/get_auth").then((res) => {
-      const auth: Auth = res.data;
-      const provider = new GoogleAuthProvider();
-      signInWithPopup(auth, provider)
-        .then((res) => {
-          //Retrieving Google Access Token to Access Google API
-          const credentials = GoogleAuthProvider.credentialFromResult(res);
-          const token = credentials?.accessToken;
+    const provider = new GoogleAuthProvider();
 
-          //Retrieving User Info
-          const user = res.user;
+    signInWithPopup(auth, provider)
+      .then((res) => {
+        //Retrieving Google Access Token to Access Google API
+        const credentials = GoogleAuthProvider.credentialFromResult(res);
+        const token = credentials?.accessToken;
 
-          //Send current user info to backend/redux store
+        //Retrieving User Info
+        const user = res.user;
 
-          //Redirect to Dashboard
+        //Send current user info to backend/redux store
+
+        //Redirect to Dashboard
+        if (user) {
           navigate("/my", { replace: true });
-        })
-        .catch((err) => {
-          console.log(err);
-          //Handle errors here
-        });
-    });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        //Handle errors here
+      });
   };
 
   const githubSignIn = async () => {};
   const emailSignIn = async () => {
-    axios
-      .post("http://localhost:3000/api/auth/email_login", {
-        user: {
-          email: signInData.email,
-          password: signInData.password,
-        },
-      })
-      .then((res) => {
-        if (res.status === 200) {
-          //Update Redux Store
-          console.log("yipee!");
-          //Navigate to Dashboard
-          navigate("/my");
-        }
-      });
+    if (signInData.email && signInData.password) {
+      signInWithEmailAndPassword(auth, signInData.email, signInData.password)
+        .then((userCred) => {
+          //Update Redux later probs
+          navigate("/my", { replace: true });
+        })
+        .catch((error) => {
+          // res.status(401).send(error.message)
+          console.log(error.message);
+        });
+    }
   };
   const facebookSignIn = async () => {};
 
   //Signup functions
   const emailSignUp = async () => {
-    axios
-      .post("http://localhost:3000/api/auth/create_user", {
-        user: {
-          name: signUpData.name,
-          email: signUpData.email,
-          password: signUpData.password,
-        },
-      })
-      .then((res) => {
-        if (res.status === 200) {
-          //Update Redux Store with Current User
-
-          //Navigate to dashboard
-          navigate("/my");
-        }
+    createUserWithEmailAndPassword(auth, signUpData.email, signUpData.password)
+      .then((userCred) => {
+        const user = userCred.user;
+        updateProfile(user, {}).then(() => {
+          const firebaseUser: TUser = {
+            uid: user.uid,
+            email: user.email ? user.email : "",
+            displayName: user.displayName ? user.displayName : "New User",
+            photoURL: user.photoURL ? user.photoURL : "",
+          };
+          axios.post("http://localhost:3000/api/auth/create_user", {
+            user: firebaseUser,
+          });
+        });
       })
       .catch((err) => {
-        // console.log(err);
         console.log(err);
       });
   };
@@ -128,6 +125,13 @@ function Login() {
     );
   };
 
+  const signInDetailValidation = (
+    e: React.FormEvent<HTMLFormElement>
+  ): boolean => {
+    e.preventDefault();
+    return signInData.email.length > 0 && signInData.password.length > 7;
+  };
+
   return (
     <>
       <div
@@ -138,14 +142,7 @@ function Login() {
           className="absolute top-0 bg-zinc-200 dark:bg-zinc-800 h-full transition-transform duration-[300ms] -left-1/3 w-2/3 opacity-0 z-[1] flex justify-center"
           id="sign-up-container"
         >
-          <form
-            onSubmit={(e) => {
-              if (signUpDetailValidation(e)) {
-                emailSignUp();
-              }
-            }}
-            className="flex justify-center items-center flex-col px-12 text-center h-full w-1/2"
-          >
+          <section className="flex justify-center items-center flex-col px-12 text-center h-full w-1/2">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-800/80 dark:text-zinc-200">
               Sign Up
             </h1>
@@ -154,85 +151,90 @@ function Login() {
                 onClick={() => {
                   googleSignIn();
                 }}
-                className="w-12 h-12 text-[45px] text-zinc-800/80 dark:text-zinc-200 "
+                className="w-12 h-12 text-[45px] text-zinc-800/80 dark:text-zinc-200 hover:text-zinc-500 hover:dark:text-zinc-400 "
               >
                 <BsGoogle />
               </button>
-              <button className="text-[45px] text-zinc-800/80 dark:text-zinc-200">
+              <button className="text-[45px] text-zinc-800/80 dark:text-zinc-200 hover:text-zinc-500 hover:dark:text-zinc-400">
                 <BsGithub />
               </button>
 
-              <button className="text-[45px] text-zinc-800/80 dark:text-zinc-200">
+              <button className="text-[45px] text-zinc-800/80 dark:text-zinc-200 hover:text-zinc-500 hover:dark:text-zinc-400">
                 <BsLinkedin />
               </button>
             </div>
-            <div className=" p-4 flex w-full items-center">
-              <p className="h-[1px] bg-zinc-800/80 dark:bg-zinc-200 w-full"></p>
-              <span className="m-2 border py-2 px-3 rounded-full text-zinc-800 dark:text-zinc-200 md:text-lg">
-                Or
-              </span>
-              <p className="h-[1px] bg-zinc-800 dark:bg-zinc-200 w-full"></p>
-            </div>
+            <form
+              onSubmit={(e) => {
+                if (signUpDetailValidation(e)) {
+                  emailSignUp();
+                }
+              }}
+            >
+              <div className=" p-4 flex w-full items-center">
+                <p className="h-[1px] bg-zinc-800/80 dark:bg-zinc-200 w-full"></p>
+                <span className="m-2 border py-2 px-3 rounded-full text-zinc-800 dark:text-zinc-200 md:text-lg">
+                  Or
+                </span>
+                <p className="h-[1px] bg-zinc-800 dark:bg-zinc-200 w-full"></p>
+              </div>
 
-            <input
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setSignUpData({ ...signUpData, name: e.target.value });
-              }}
-              className="p-3 bg-zinc-300/90 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
-              type="text"
-              placeholder="Name"
-              name="name"
-            />
-            <input
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setSignUpData({ ...signUpData, email: e.target.value });
-              }}
-              className="p-3 bg-zinc-300/90 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
-              type="email"
-              placeholder="Email"
-              name="email"
-            />
-            <input
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setSignUpData({ ...signUpData, password: e.target.value });
-              }}
-              className={`p-3 bg-zinc-300/70 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800  `}
-              type="password"
-              placeholder="Password"
-              name="password"
-            />
-            <input
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setSignUpData({
-                  ...signUpData,
-                  confirmPassword: e.target.value,
-                });
-              }}
-              className="p-3 bg-zinc-300/70 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
-              type="password"
-              placeholder="Confirm Password"
-              name="confirmPassword"
-            />
+              <input
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setSignUpData({ ...signUpData, name: e.target.value });
+                }}
+                className="p-3 bg-zinc-300/90 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
+                type="text"
+                placeholder="Name"
+                name="name"
+              />
+              <input
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setSignUpData({ ...signUpData, email: e.target.value });
+                }}
+                className="p-3 bg-zinc-300/90 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
+                type="email"
+                placeholder="Email"
+                name="email"
+              />
+              <input
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setSignUpData({ ...signUpData, password: e.target.value });
+                }}
+                className={`p-3 bg-zinc-300/70 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800  `}
+                type="password"
+                placeholder="Password"
+                name="password"
+              />
+              <input
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setSignUpData({
+                    ...signUpData,
+                    confirmPassword: e.target.value,
+                  });
+                }}
+                className="p-3 bg-zinc-300/70 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
+                type="password"
+                placeholder="Confirm Password"
+                name="confirmPassword"
+              />
 
-            <div className="space-y-2 flex flex-col justify-center items-center group pt-4">
-              <button className=" rounded-2xl bg-gradient-to-tr from-blue-400 to-blue-900 text-zinc-200 mb-2 py-3 px-11 uppercase transition-all hover:scale-[1.02]">
-                Sign Up
-              </button>
+              <div className="space-y-2 flex flex-col justify-center items-center group pt-4">
+                <button className=" rounded-2xl bg-gradient-to-tr from-blue-400 to-blue-900 text-zinc-200 mb-2 py-3 px-11 uppercase transition-all hover:scale-[1.02]">
+                  Sign Up
+                </button>
 
-              <p className="h-[1px] bg-zinc-700/80 dark:bg-zinc-300/70 w-3/4 scale-0 transition-all origin-right duration-[200ms] group-hover:scale-100"></p>
-              <p className="h-[1px] bg-zinc-700/80 dark:bg-zinc-300/70 w-1/2 scale-0 transition-all origin-left duration-[400ms] group-hover:scale-100"></p>
-              <p className="h-[1px] bg-zinc-700/80 dark:bg-zinc-300/70 w-1/4 scale-0 transition-all origin-center duration-[600ms] group-hover:scale-100"></p>
-            </div>
-          </form>
+                <p className="h-[1px] bg-zinc-700/80 dark:bg-zinc-300/70 w-3/4 scale-0 transition-all origin-right duration-[200ms] group-hover:scale-100"></p>
+                <p className="h-[1px] bg-zinc-700/80 dark:bg-zinc-300/70 w-1/2 scale-0 transition-all origin-left duration-[400ms] group-hover:scale-100"></p>
+                <p className="h-[1px] bg-zinc-700/80 dark:bg-zinc-300/70 w-1/4 scale-0 transition-all origin-center duration-[600ms] group-hover:scale-100"></p>
+              </div>
+            </form>
+          </section>
         </div>
         <div
           className="absolute top-0 h-full transition-transform duration-300 left-0 w-2/3 z-[2] bg-zinc-200 dark:bg-zinc-800 flex justify-center"
           id="sign-in-container"
         >
-          <form
-            className=" flex justify-center items-center flex-col px-12 text-center h-full w-1/2"
-            action="#"
-          >
+          <section className=" flex justify-center items-center flex-col px-12 text-center h-full w-1/2">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-800/80 dark:text-zinc-200">
               Login to Your Account
             </h1>
@@ -241,59 +243,66 @@ function Login() {
                 onClick={() => {
                   googleSignIn();
                 }}
-                className="w-12 h-12 text-[45px] text-zinc-800/80 dark:text-zinc-200 "
+                className="text-[45px] text-zinc-800/80 dark:text-zinc-200"
               >
                 <BsGoogle />
               </button>
-              <button className="text-[45px] text-zinc-800/80 dark:text-zinc-200">
+              <button className="text-[45px] text-zinc-800/80 dark:text-zinc-200 hover:text-zinc-500 hover:dark:text-zinc-400">
                 <BsGithub />
               </button>
 
-              <button className="text-[45px] text-zinc-800/80 dark:text-zinc-200">
+              <button className="text-[45px] text-zinc-800/80 dark:text-zinc-200 hover:text-zinc-500 hover:dark:text-zinc-400">
                 <BsLinkedin />
               </button>
             </div>
-            <div className=" p-4 flex w-full items-center">
-              <p className="h-[1px] bg-zinc-800/80 dark:bg-zinc-200 w-full"></p>
-              <span className="m-2 border py-2 px-3 rounded-full text-zinc-800 dark:text-zinc-200 md:text-lg">
-                Or
-              </span>
-              <p className="h-[1px] bg-zinc-800 dark:bg-zinc-200 w-full"></p>
-            </div>
-            <input
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setSignInData({ ...signInData, email: e.target.value });
-              }}
-              className="p-3 bg-zinc-300/90 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
-              type="email"
-              placeholder="Email"
-            />
-            <input
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setSignInData({ ...signInData, password: e.target.value });
-              }}
-              className="p-3 bg-zinc-300/70 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
-              type="password"
-              placeholder="Password"
-            />
-            <button className="p-4 text-zinc-700 dark:text-zinc-500 hover:underline hover:dark:text-zinc-400">
-              Forgot your password?
-            </button>
-            <div className="space-y-2 flex flex-col justify-center items-center group">
-              <button
-                onClick={() => {
+            <form
+              className=""
+              onSubmit={(e) => {
+                if (signInDetailValidation(e)) {
                   emailSignIn();
+                }
+              }}
+            >
+              <div className=" p-4 flex w-full items-center">
+                <p className="h-[1px] bg-zinc-800/80 dark:bg-zinc-200 w-full"></p>
+                <span className="m-2 border py-2 px-3 rounded-full text-zinc-800 dark:text-zinc-200 md:text-lg">
+                  Or
+                </span>
+                <p className="h-[1px] bg-zinc-800 dark:bg-zinc-200 w-full"></p>
+              </div>
+              <input
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setSignInData({ ...signInData, email: e.target.value });
                 }}
-                className=" rounded-2xl bg-gradient-to-tr from-blue-400 to-blue-900 text-zinc-200 mb-2 py-3 px-11 uppercase transition-all hover:scale-[1.02]"
-              >
-                Sign In
+                className="p-3 bg-zinc-300/90 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
+                type="email"
+                placeholder="Email"
+              />
+              <input
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setSignInData({ ...signInData, password: e.target.value });
+                }}
+                className="p-3 bg-zinc-300/70 dark:bg-zinc-200 w-full my-2 rounded-xl placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800"
+                type="password"
+                placeholder="Password"
+              />
+              <button className="p-4 text-zinc-700 dark:text-zinc-500 hover:underline hover:dark:text-zinc-400">
+                Forgot your password?
               </button>
+              <div className="space-y-2 flex flex-col justify-center items-center group">
+                <button
+                  type="submit"
+                  className=" rounded-2xl bg-gradient-to-tr from-blue-400 to-blue-900 text-zinc-200 mb-2 py-3 px-11 uppercase transition-all hover:scale-[1.02]"
+                >
+                  Sign In
+                </button>
 
-              <p className="h-[1px] bg-zinc-700/80 dark:bg-zinc-300/70 w-3/4 scale-0 transition-all origin-right duration-[200ms] group-hover:scale-100"></p>
-              <p className="h-[1px] bg-zinc-700/80 dark:bg-zinc-300/70 w-1/2 scale-0 transition-all origin-left duration-[400ms] group-hover:scale-100"></p>
-              <p className="h-[1px] bg-zinc-700/80 dark:bg-zinc-300/70 w-1/4 scale-0 transition-all origin-center duration-[600ms] group-hover:scale-100"></p>
-            </div>
-          </form>
+                <p className="h-[1px] bg-zinc-700/80 dark:bg-zinc-300/70 w-3/4 scale-0 transition-all origin-right duration-[200ms] group-hover:scale-100"></p>
+                <p className="h-[1px] bg-zinc-700/80 dark:bg-zinc-300/70 w-1/2 scale-0 transition-all origin-left duration-[400ms] group-hover:scale-100"></p>
+                <p className="h-[1px] bg-zinc-700/80 dark:bg-zinc-300/70 w-1/4 scale-0 transition-all origin-center duration-[600ms] group-hover:scale-100"></p>
+              </div>
+            </form>
+          </section>
         </div>
         <div
           className="absolute top-0 left-2/3 w-1/3 h-[60rem]  overflow-hidden transition-transform duration-300 z-[100]"

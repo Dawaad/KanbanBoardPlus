@@ -1,23 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 import { DragDropContext, DropResult, Droppable } from "react-beautiful-dnd";
+import { useParams } from 'react-router-dom';
 import BoardColumn from "./BoardColumn";
 
 function TaskBoardComp() {
-  const colMap = new Map();
-  colMap.set("Backlogged", ["Task 1", "Task 2", "Task 3", "Task 4", "Task 5"]);
-  colMap.set("To Do", ["Task 1", "Task 2", "Task 3", "Task 4", "Task 5"]);
-  colMap.set("In Progress", [
-    "Task 6",
-    "Task 7",
-    "Task 8",
-    "Task 9",
-    "Task 10",
-  ]);
-  colMap.set("Review", ["Task 11", "Task 12", "Task 13", "Task 14", "Task 15"]);
-  colMap.set("Done", ["Task 11", "Task 12", "Task 13", "Task 14", "Task 15"]);
+  const { group } = useParams();
+  const [columns, setColumns] = useState(new Map());
 
-  const [columns, setColumns] = useState(colMap);
+  useEffect(() => {
+    // get the columns from the database
+    axios.get(`http://localhost:3000/api/boards/${group}`)
+      .then(({ data }) => { // TODO: make type for this
+        const newColumns = new Map();
+        for (const [key, value] of Object.entries(data)) {
+          newColumns.set(key, value);
+        }
+        setColumns(newColumns);
+      })
+      .catch(err => {
+        console.log(err);
+        console.log('poop'); // TODO: handle can't reach server
+      });
+
+  }, []);
+
+  const syncSetColumns = (columns: any) => {
+    setColumns(columns);
+
+    // send columns to the server
+    axios.post(`http://localhost:3000/api/boards/${group}`, Object.fromEntries(columns));
+  };
 
   const handleOnDragEnd = (result: DropResult) => {
     const { destination, source, type } = result;
@@ -27,8 +41,7 @@ function TaskBoardComp() {
       const entries = Array.from(columns.entries());
       const [removed] = entries.splice(source.index, 1);
       entries.splice(destination.index, 0, removed);
-
-      setColumns(new Map(entries));
+      syncSetColumns(new Map(entries));
     }
     //Card Drag
     if (type === "card") {
@@ -55,7 +68,7 @@ function TaskBoardComp() {
 
         const [removed] = tasks.splice(source.index, 1);
         tasks.splice(destination.index, 0, removed);
-        setColumns(new Map(columns.set(sourceColumn, tasks)));
+        syncSetColumns(new Map(columns.set(sourceColumn, tasks)));
       }
       //Different Column
       else {
@@ -66,7 +79,7 @@ function TaskBoardComp() {
 
         const [removed] = sourceTasks.splice(source.index, 1);
         destTasks.splice(destination.index, 0, removed);
-        setColumns(
+        syncSetColumns(
           new Map(
             columns.set(sourceColumn, sourceTasks).set(destColumn, destTasks)
           )

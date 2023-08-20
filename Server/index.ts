@@ -140,6 +140,56 @@ app.put("/api/tasks/:taskId", (req: Request, res: Response) => {
     });
 });
 
+// temporarily use array
+/*
+{
+  "groups": {
+    groupId -> {
+      tasks: {}
+    }
+  }
+}
+ */
+const DEFAULT_DATA = new Map<string, string[]>();
+DEFAULT_DATA.set("Backlogged", ["Task 1", "Task 2", "Task 3", "Task 4", "Task 5"]);
+DEFAULT_DATA.set("To Do", ["Task 1", "Task 2", "Task 3", "Task 4", "Task 5"]);
+DEFAULT_DATA.set("In Progress", [
+  "Task 6",
+  "Task 7",
+  "Task 8",
+  "Task 9",
+  "Task 10",
+]);
+DEFAULT_DATA.set("Review", ["Task 11", "Task 12", "Task 13", "Task 14", "Task 15"]);
+DEFAULT_DATA.set("Done", ["Task 11", "Task 12", "Task 13", "Task 14", "Task 15"]);
+const boards: { groups: Map<string, Map<string, string[]>> } = { groups: new Map() };
+const fillDefault = (group: string) => {
+  const newGroup = new Map();
+  for (const [key, value] of DEFAULT_DATA.entries()) {
+    newGroup.set(key, [...value]);
+  }
+  boards.groups.set(group, newGroup);
+};
+
+// TODO: use actual database + authentication
+app.get("/api/boards/:group", (req: Request, res: Response) => {
+  const { group } = req.params;
+  if (!boards.groups.has(group)) {
+    fillDefault(group);
+  }
+  res.status(200).json(Object.fromEntries(boards.groups.get(group)?.entries()!));
+});
+
+app.post("/api/boards/:group", (req: Request, res: Response) => {
+  const { group } = req.params;
+  const newBoard = new Map();
+  for (const [key, value] of Object.entries(req.body)) {
+    newBoard.set(key, value);
+  }
+  boards.groups.set(group, newBoard);
+  res.status(200).send();
+});
+
 //// sample realtime board subscription
 // app.get("/api/subscribe/boards/:boardId", (req: Request, res: Response) => {
 //   const boardRef = doc(db ,'boards', req.params.boardId);

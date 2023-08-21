@@ -7,7 +7,7 @@ import {
   Auth,
   createUserWithEmailAndPassword,
   updateProfile,
-  getAuth,
+
   onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
@@ -29,7 +29,6 @@ var cors = require("cors");
 var bodyParser = require("body-parser");
 
 const app: Express = express();
-const auth: Auth = getAuth();
 var jsonParser = bodyParser.json();
 var urlEncodedParser = bodyParser.urlencoded({ extended: false });
 
@@ -45,15 +44,6 @@ app.get("/", (req: Request, res: Response) => {
 
 app.get("/login", (req: Request, res: Response) => {
   res.send("Login");
-});
-
-app.get("/api/auth/get_auth", (req: Request, res: Response) => {
-  console.log(auth);
-  if (auth) {
-    res.send(auth);
-  } else {
-    res.send("Not Authenticated").status(401);
-  }
 });
 
 app.post("/api/auth/create_user", (req: Request, res: Response) => {

@@ -134,10 +134,7 @@ function Login() {
 
   return (
     <>
-      <div
-        className="relative overflow-hidden h-[40rem] md:h-[55rem] lg:h-[57rem]"
-        id="container"
-      >
+      <div className="relative overflow-hidden h-[100dvh]" id="container">
         <div
           className="absolute top-0 bg-zinc-200 dark:bg-zinc-800 h-full transition-transform duration-[300ms] -left-1/3 w-2/3 opacity-0 z-[1] flex justify-center"
           id="sign-up-container"

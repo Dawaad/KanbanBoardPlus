@@ -45,11 +45,11 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
   return (
     <div className="overflow-y-hidden h-screen">
       {/* Your common layout elements */}
-      <header className="h-[3.75rem] bg-zinc-200/40 dark:bg-zinc-800/50 border-b border-b-zinc-600/60  dark:border-b-zinc-400/60">
+      <header className="h-[3.75rem] bg-zinc-200/40 dark:bg-zinc-900 border-b border-b-zinc-600/60  dark:border-b-zinc-400/60">
         <div className="flex flex-row items-center px-5 py-3 ">
           {/*Title*/}
           <Link
-            to={"/"}
+            to={"/my"}
             id="nav-logo"
             className=" h-fit  text-2xl md:text-3xl font-extrabold flex group cursor-pointer text-zinc-800/80 dark:text-zinc-200/80 "
           >

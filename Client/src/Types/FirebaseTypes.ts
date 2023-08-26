@@ -3,6 +3,7 @@ export type TUser = {
   email: string;
   displayName: string;
   photoURL: string;
+  assignedBoards: string[];
 };
 
 export type TTask = {
@@ -22,11 +23,9 @@ export type TColumn = {
 
 export type TBoard = {
   id: string;
+  ownerID: TUser;
   title: string;
-  columns: TColumn[];
+  columns: Map<string, TColumn>;
   adminUsers: TUser[];
   memberUsers: TUser[];
 };
-
-
-

@@ -61,7 +61,22 @@ function Login() {
         const user = res.user;
 
         //Send current user info to backend/redux store
-
+        //Check to see if the google user is already in the database
+        axios.get(`http://localhost:3000/api/users/${user.uid}`).then((res) => {
+          if (res.data === false) {
+            //If not, create a new user
+            const firebaseUser: TUser = {
+              uid: user.uid,
+              email: user.email ? user.email : "",
+              displayName: user.displayName ? user.displayName : "New User",
+              photoURL: user.photoURL ? user.photoURL : "",
+              assignedBoards: [],
+            };
+            axios.post("http://localhost:3000/api/auth/create_user", {
+              user: firebaseUser,
+            });
+          }
+        });
         //Redirect to Dashboard
         if (user) {
           navigate("/my", { replace: true });
@@ -100,6 +115,7 @@ function Login() {
             email: user.email ? user.email : "",
             displayName: user.displayName ? user.displayName : "New User",
             photoURL: user.photoURL ? user.photoURL : "",
+            assignedBoards: [],
           };
           axios.post("http://localhost:3000/api/auth/create_user", {
             user: firebaseUser,
@@ -139,7 +155,7 @@ function Login() {
         id="container"
       >
         <div
-          className="absolute top-0 bg-zinc-200 dark:bg-zinc-800 h-full transition-transform duration-[300ms] -left-1/3 w-2/3 opacity-0 z-[1] flex justify-center"
+          className="absolute top-0 bg-zinc-200 dark:bg-zinc-900 h-full transition-transform duration-[300ms] -left-1/3 w-2/3 opacity-0 z-[1] flex justify-center"
           id="sign-up-container"
         >
           <section className="flex justify-center items-center flex-col px-12 text-center h-full w-1/2">
@@ -231,7 +247,7 @@ function Login() {
           </section>
         </div>
         <div
-          className="absolute top-0 h-full transition-transform duration-300 left-0 w-2/3 z-[2] bg-zinc-200 dark:bg-zinc-800 flex justify-center"
+          className="absolute top-0 h-full transition-transform duration-300 left-0 w-2/3 z-[2] bg-zinc-200 dark:bg-zinc-900 flex justify-center"
           id="sign-in-container"
         >
           <section className=" flex justify-center items-center flex-col px-12 text-center h-full w-1/2">

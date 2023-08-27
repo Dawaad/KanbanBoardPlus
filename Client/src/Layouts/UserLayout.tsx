@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Link, Outlet } from "react-router-dom";
-import Avatar from "react-avatar";
+import { getAuth } from "firebase/auth";
+import AvatarDropDown from "@/Components/Nav/AvatarDropDown";
 import {
   MagnifyingGlassIcon,
   MoonIcon,
@@ -14,6 +15,7 @@ interface LProps {
 const UserLayout: React.FC<LProps> = ({ children }) => {
   const html = document.querySelector("html");
   const userTheme = localStorage.getItem("theme");
+  const auth = getAuth();
   const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
@@ -118,17 +120,12 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
                 themeSwitch();
               }}
             >
-              <SunIcon className=" dark_sun sun hover_light_sun hover_dark_sun  " />
-              <MoonIcon className=" moon dark_moon hover_light_moon hover_dark_moon " />
+              <SunIcon className=" dark_sun sun   " />
+              <MoonIcon className=" moon dark_moon  " />
             </button>
             {/*Sample Avatar*/}
-            <Avatar
-              className="cursor-pointer"
-              name="Jared Tucker"
-              round
-              size="28"
-              color="#0055D1"
-            />
+            <AvatarDropDown auth={auth}/>
+           
           </div>
         </div>
       </header>

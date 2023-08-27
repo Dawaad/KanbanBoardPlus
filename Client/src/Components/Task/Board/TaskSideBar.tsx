@@ -1,5 +1,5 @@
 import React from "react";
-import Avatar from "react-avatar";
+
 import {
   PlusIcon,
   ShareIcon,
@@ -23,7 +23,7 @@ const users = [
 ];
 function TaskSideBar() {
   return (
-    <aside className="w-[3rem] hover:w-[25rem] bg-zinc-200/40 dark:bg-zinc-800/50  transition-all  ">
+    <aside className="w-[3rem] hover:w-[25rem] bg-zinc-200/40 dark:bg-zinc-900/50  transition-all  ">
       <section
         className="py-4 border-b border-b-zinc-600/60 dark:border-b-zinc-400/60"
         id="section-social"
@@ -33,26 +33,28 @@ function TaskSideBar() {
             {/*Sample Avatar, Replace Dynamically with Users*/}
 
             {/*This should be the avatar of the current user */}
-            <Avatar
+            {/* <Avatar
               className="cursor-pointer"
               name="Jared Tucker"
               round
               size="32"
               color="#0055D1"
-            />
+            /> */}
           </div>
           {/*This should be the avatar of the other team members within the kanban board*/}
           <div className="flex -space-x-1">
             {users.slice(0, 4).map((user: string, index: number) => {
               return (
-                <Avatar
-                  key={user}
-                  className="cursor-pointer"
-                  round
-                  size="32"
-                  color={colourHex[index]}
-                  name={user}
-                />
+                // <Avatar
+                //   key={user}
+                //   className="cursor-pointer"
+                //   round
+                //   size="32"
+                //   color={colourHex[index]}
+                //   name={user}
+                // />
+                <>
+                </>
               );
             })}
           </div>

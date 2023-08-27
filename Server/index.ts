@@ -185,6 +185,14 @@ const fillDefault = (group: string) => {
   boards.groups.set(group, newGroup);
 };
 
+app.get("/api/boards/:userID",(req:Request, res:Response) => {
+  const userID = req.params.userID;
+  const userRef = doc(db, "users", userID);
+  getDoc(userRef).then((userSnap: DocumentSnapshot) => {
+    
+  })
+})
+
 app.post("/api/boards/create", (req: Request, res: Response) => {
   const { boardName, userID } = req.body;
 

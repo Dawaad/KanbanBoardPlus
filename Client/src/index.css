@@ -124,6 +124,10 @@
   transform: translateX(50%);
 }
 
+.default-bg{
+  @apply bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700
+}
+
 #container.right-panel-active #sign-up-container {
   transform: translateX(100%);
 

@@ -115,17 +115,16 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
               </button>
             </form>
             <button
-              className=" transition-all pr-4 flex items-center group"
+              className=" transition-all pr-4 flex items-center group "
               onClick={() => {
                 themeSwitch();
               }}
             >
-              <SunIcon className=" dark_sun sun   " />
-              <MoonIcon className=" moon dark_moon  " />
+              <SunIcon className=" dark_sun sun hover:text-zinc-500" />
+              <MoonIcon className=" moon dark_moon  hover:text-zinc-500" />
             </button>
             {/*Sample Avatar*/}
-            <AvatarDropDown auth={auth}/>
-           
+            <AvatarDropDown auth={auth} />
           </div>
         </div>
       </header>

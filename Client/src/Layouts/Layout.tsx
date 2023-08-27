@@ -36,7 +36,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="overflow-y-hidden h-screen">
       {/* Your common layout elements */}
-      <header className="h-[3.75rem] bg-zinc-200/40 dark:bg-zinc-800/50 border-b border-b-zinc-600/60  dark:border-b-zinc-400/60">
+      <header className="h-[3.75rem] bg-zinc-200/40 dark:bg-zinc-900 border-b border-b-zinc-600/60  dark:border-b-zinc-400/60">
         <div className="flex flex-row items-center px-5 py-3 ">
           {/*Title*/}
           <Link

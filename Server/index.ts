@@ -1,5 +1,5 @@
 import express, { Express, Request, Response } from "express";
-import { TUser } from "../Client/src/Types/FirebaseTypes";
+import { TBoard, TUser } from "../Client/src/Types/FirebaseTypes";
 import dotenv from "dotenv";
 import { firebaseApp, db } from "./firebase";
 import {
@@ -7,7 +7,6 @@ import {
   Auth,
   createUserWithEmailAndPassword,
   updateProfile,
-  getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
@@ -29,7 +28,6 @@ var cors = require("cors");
 var bodyParser = require("body-parser");
 
 const app: Express = express();
-const auth: Auth = getAuth();
 var jsonParser = bodyParser.json();
 var urlEncodedParser = bodyParser.urlencoded({ extended: false });
 
@@ -47,22 +45,14 @@ app.get("/login", (req: Request, res: Response) => {
   res.send("Login");
 });
 
-app.get("/api/auth/get_auth", (req: Request, res: Response) => {
-  console.log(auth);
-  if (auth) {
-    res.send(auth);
-  } else {
-    res.send("Not Authenticated").status(401);
-  }
-});
-
 app.post("/api/auth/create_user", (req: Request, res: Response) => {
   // Retrieving User Details from request
 
   const firebaseUser: TUser = req.body.user;
-
+  console.log("hey");
   try {
-    const docRef = addDoc(collection(db, "users"), firebaseUser);
+    const docRef = doc(db, "users", firebaseUser.uid);
+    setDoc(docRef, firebaseUser);
     res.status(200).send(firebaseUser);
   } catch (e) {
     // console.error("Error adding document: ", e);
@@ -72,15 +62,19 @@ app.post("/api/auth/create_user", (req: Request, res: Response) => {
 
 // Tiny little check to see if get user works
 app.get("/api/users/:userId", (req: Request, res: Response) => {
+  console.log("hey");
+  console.log(req.params.userId);
   const userRef = doc(db, "users", req.params.userId);
 
   getDoc(userRef).then((userSnap: DocumentSnapshot) => {
     if (userSnap.exists()) {
-      const userData: UserData = userSnap.data();
+      const userData = userSnap.data();
       // send user data here
-      console.log("User data:", userData);
+
+      res.send(userData).status(200);
     } else {
       console.log("No such user!");
+      res.send(false).status(404);
     }
   });
 });
@@ -138,6 +132,129 @@ app.put("/api/tasks/:taskId", (req: Request, res: Response) => {
     .catch((error) => {
       console.error("Error updating document: ", error);
     });
+});
+
+// temporarily use array
+/*
+{
+  "groups": {
+    groupId -> {
+      tasks: {}
+    }
+  }
+}
+ */
+const DEFAULT_DATA = new Map<string, string[]>();
+DEFAULT_DATA.set("Backlogged", [
+  "Task 1",
+  "Task 2",
+  "Task 3",
+  "Task 4",
+  "Task 5",
+]);
+DEFAULT_DATA.set("To Do", ["Task 1", "Task 2", "Task 3", "Task 4", "Task 5"]);
+DEFAULT_DATA.set("In Progress", [
+  "Task 6",
+  "Task 7",
+  "Task 8",
+  "Task 9",
+  "Task 10",
+]);
+DEFAULT_DATA.set("Review", [
+  "Task 11",
+  "Task 12",
+  "Task 13",
+  "Task 14",
+  "Task 15",
+]);
+DEFAULT_DATA.set("Done", [
+  "Task 11",
+  "Task 12",
+  "Task 13",
+  "Task 14",
+  "Task 15",
+]);
+const boards: { groups: Map<string, Map<string, string[]>> } = {
+  groups: new Map(),
+};
+const fillDefault = (group: string) => {
+  const newGroup = new Map();
+  for (const [key, value] of DEFAULT_DATA.entries()) {
+    newGroup.set(key, [...value]);
+  }
+  boards.groups.set(group, newGroup);
+};
+
+app.get("/api/boards/:userID",(req:Request, res:Response) => {
+  const userID = req.params.userID;
+  const userRef = doc(db, "users", userID);
+  getDoc(userRef).then((userSnap: DocumentSnapshot) => {
+    
+  })
+})
+
+app.post("/api/boards/create", (req: Request, res: Response) => {
+  const { boardName, userID } = req.body;
+
+  const userRef = doc(db, "users", userID);
+  const boardDoc = {
+    id: "",
+    ownerID: userID,
+    title: boardName,
+    columns: {},
+    adminUsers: [userRef],
+    memberUsers: [],
+  };
+  const boardRef = collection(db, "boards");
+  addDoc(boardRef, boardDoc)
+    .then((docRef) => {
+      updateDoc(docRef, {
+        id: docRef.id,
+      });
+      getDoc(userRef)
+        .then((userSnap: DocumentSnapshot) => {
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            // send user data here
+            const userBoards = userData?.assignedBoards;
+            if (userBoards) {
+              userBoards.push(docRef.id);
+              updateDoc(userRef, {
+                assignedBoards: userBoards,
+              });
+            }
+          } else {
+            console.log("No such user!");
+          }
+        })
+        .then(() => {
+          res.send(docRef.id).status(200);
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+// TODO: use actual database + authentication
+app.get("/api/boards/:group", (req: Request, res: Response) => {
+  const { group } = req.params;
+  if (!boards.groups.has(group)) {
+    fillDefault(group);
+  }
+  res
+    .status(200)
+    .json(Object.fromEntries(boards.groups.get(group)?.entries()!));
+});
+
+app.post("/api/boards/:group", (req: Request, res: Response) => {
+  const { group } = req.params;
+  const newBoard = new Map();
+  for (const [key, value] of Object.entries(req.body)) {
+    newBoard.set(key, value);
+  }
+  boards.groups.set(group, newBoard);
+  res.status(200).send();
 });
 
 //// sample realtime board subscription

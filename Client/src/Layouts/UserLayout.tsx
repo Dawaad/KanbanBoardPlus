@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Link, Outlet } from "react-router-dom";
-import Avatar from "react-avatar";
+import { getAuth } from "firebase/auth";
+import AvatarDropDown from "@/Components/Nav/AvatarDropDown";
 import {
   MagnifyingGlassIcon,
   MoonIcon,
@@ -14,6 +15,7 @@ interface LProps {
 const UserLayout: React.FC<LProps> = ({ children }) => {
   const html = document.querySelector("html");
   const userTheme = localStorage.getItem("theme");
+  const auth = getAuth();
   const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
@@ -45,11 +47,11 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
   return (
     <div className="overflow-y-hidden h-screen">
       {/* Your common layout elements */}
-      <header className="h-[3.75rem] bg-zinc-200/40 dark:bg-zinc-800/50 border-b border-b-zinc-600/60  dark:border-b-zinc-400/60">
+      <header className="h-[3.75rem] bg-zinc-200/40 dark:bg-zinc-900 border-b border-b-zinc-600/60  dark:border-b-zinc-400/60">
         <div className="flex flex-row items-center px-5 py-3 ">
           {/*Title*/}
           <Link
-            to={"/"}
+            to={"/my"}
             id="nav-logo"
             className=" h-fit  text-2xl md:text-3xl font-extrabold flex group cursor-pointer text-zinc-800/80 dark:text-zinc-200/80 "
           >
@@ -113,22 +115,16 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
               </button>
             </form>
             <button
-              className=" transition-all pr-4 flex items-center group"
+              className=" transition-all pr-4 flex items-center group "
               onClick={() => {
                 themeSwitch();
               }}
             >
-              <SunIcon className=" dark_sun sun hover_light_sun hover_dark_sun  " />
-              <MoonIcon className=" moon dark_moon hover_light_moon hover_dark_moon " />
+              <SunIcon className=" dark_sun sun hover:text-zinc-500" />
+              <MoonIcon className=" moon dark_moon  hover:text-zinc-500" />
             </button>
             {/*Sample Avatar*/}
-            <Avatar
-              className="cursor-pointer"
-              name="Jared Tucker"
-              round
-              size="28"
-              color="#0055D1"
-            />
+            <AvatarDropDown auth={auth} />
           </div>
         </div>
       </header>

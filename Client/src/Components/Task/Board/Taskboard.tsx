@@ -11,18 +11,20 @@ function TaskBoardComp() {
 
   useEffect(() => {
     // get the columns from the database
-    axios.get(`http://localhost:3000/api/boards/${group}`)
+    console.log('here');
+    console.log(axios.get(`http://localhost:3000/api/boards/group/get/${group}`)
       .then(({ data }) => { // TODO: make type for this
         const newColumns = new Map();
         for (const [key, value] of Object.entries(data)) {
           newColumns.set(key, value);
         }
+        console.log(data);
         setColumns(newColumns);
       })
       .catch(err => {
         console.log(err);
         console.log('poop'); // TODO: handle can't reach server
-      });
+      }));
 
   }, []);
 
@@ -30,7 +32,7 @@ function TaskBoardComp() {
     setColumns(columns);
 
     // send columns to the server
-    axios.post(`http://localhost:3000/api/boards/${group}`, Object.fromEntries(columns));
+    axios.post(`http://localhost:3000/api/boards/group/create/${group}`, Object.fromEntries(columns));
   };
 
   const handleOnDragEnd = (result: DropResult) => {

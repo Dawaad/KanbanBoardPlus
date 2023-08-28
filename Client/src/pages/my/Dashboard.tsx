@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import Sideboard from "../../Components/Dash/Sideboard";
 import { User, onAuthStateChanged, getAuth, Auth } from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
 import { PlusIcon } from "@heroicons/react/24/outline";
+import useBoards from "@/Hooks/useBoards";
 import axios from "axios";
 import DashboardTile from "../../Components/Dash/DashboardTile";
 import CreateModal from "../../Components/Dash/Create";
@@ -22,6 +23,8 @@ function Dashboard() {
     });
   }, []);
 
+  const boards = useBoards();
+
   const changeOpenState = (state: boolean) => {
     setCreateModal(state);
   };
@@ -34,7 +37,7 @@ function Dashboard() {
         </aside>
         <main className="p-4">
           <h1 className="hidden md:block md:text-2xl lg:text-4xl font-bold  my-4 text-zinc-800/80 dark:text-zinc-200">
-            Hello, {auth.currentUser?.displayName}
+            Hello, {user?.displayName}
           </h1>
           <section id="user-boards" className="mx-4">
             <div className="flex flex-row items-center pb-4">
@@ -43,18 +46,24 @@ function Dashboard() {
               </h1>
             </div>
             <div className="grid grid-cols-2 md:flex flex-row flex-wrap p-4">
-              {[1, 2, 3, 4, 5].map((number: number, index: number) => {
-                return (
-                  //This should be a link to the projects id which we can implement later
-                  <DashboardTile
-                    className={`bg-blue-${number * 100}`}
-                    boardDetails={{
-                      id: index.toString(),
-                      name: index.toString(),
-                    }}
-                  />
-                );
-              })}
+              {/* todo: Update Loading Component */}
+              {boards.loading ? (
+                <div>Loading Cuz</div>
+              ) : (
+                boards.boards
+                  .filter((board) => board.owner)
+                  .map((board) => {
+                    return (
+                      <DashboardTile
+                        boardDetails={{
+                          id: board.boardID,
+                          name: board.boardName,
+                        }}
+                      />
+                    );
+                  })
+              )}
+
               <button
                 onClick={() => {
                   setCreateModal(true);
@@ -72,16 +81,23 @@ function Dashboard() {
               </h1>
             </div>
             <div className="grid grid-cols-2 md:flex flex-row flex-wrap p-4">
-              {[1, 2, 3].map((index: number) => {
-                return (
-                  <DashboardTile
-                    boardDetails={{
-                      id: index.toString(),
-                      name: index.toString(),
-                    }}
-                  />
-                );
-              })}
+              {/* todo: Update Loading Component */}
+              {boards.loading ? (
+                <div>Loading Cuz</div>
+              ) : (
+                boards.boards
+                  .filter((board) => !board.owner)
+                  .map((board) => {
+                    return (
+                      <DashboardTile
+                        boardDetails={{
+                          id: board.boardID,
+                          name: board.boardName,
+                        }}
+                      />
+                    );
+                  })
+              )}
             </div>
           </section>
         </main>

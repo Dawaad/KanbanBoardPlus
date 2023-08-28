@@ -33,7 +33,7 @@ function DashboardTile({ className, boardDetails, ...props }: Props) {
       )}
       {...props}
     >
-      <h1>Project {boardDetails?.name}</h1>
+      <h1>{boardDetails?.name}</h1>
     </Link>
   );
 }

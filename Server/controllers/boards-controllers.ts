@@ -1,5 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import { db } from "../database/firebase";
+import { TDashTile } from "../types/types";
 import {
   addDoc,
   updateDoc,
@@ -7,6 +8,10 @@ import {
   getDoc,
   doc,
   DocumentSnapshot,
+  query,
+  where,
+  documentId,
+  getDocs,
 } from "firebase/firestore";
 
 const DEFAULT_DATA = new Map<string, string[]>();
@@ -51,14 +56,64 @@ const fillDefault = (group: string) => {
 };
 
 // TODO: figure out wtf this is
-export const handleBoardsUserId: RequestHandler = (req:Request, res:Response) => {
+export const handleBoardsUserId: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
   const userID = req.params.userID;
   const userRef = doc(db, "users", userID);
   getDoc(userRef).then((userSnap: DocumentSnapshot) => {
-  })
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      // send user data here
+      const userBoards = userData?.assignedBoards;
+      if (userBoards) {
+        res.send(userBoards).status(200);
+      }
+    } else {
+      console.log("No such user!");
+    }
+  });
 };
 
-export const handleCreateBoard: RequestHandler = (req: Request, res: Response) => {
+export const handleSingleBoardBoardId: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
+  const boardID = req.params.boardId;
+  const boardRef = doc(db, "boards", boardID);
+};
+
+export const handleManyBoardBoardId: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
+  const boardIDs = req.body.boardIDs;
+  const userID = req.body.userID;
+  const q = query(
+    collection(db, "boards"),
+    where(documentId(), "in", boardIDs)
+  );
+
+  getDocs(q).then((querySnapshot) => {
+    const boardData: TDashTile[] = [];
+    querySnapshot.forEach((doc) => {
+      const board = doc.data();
+      const boardTile: TDashTile = {
+        boardID: board.id,
+        boardName: board.title,
+        owner: board.ownerID === userID,
+      };
+      boardData.push(boardTile);
+    });
+    res.send(boardData).status(200);
+  });
+};
+
+export const handleCreateBoard: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
   const { boardName, userID } = req.body;
 
   const userRef = doc(db, "users", userID);
@@ -101,7 +156,10 @@ export const handleCreateBoard: RequestHandler = (req: Request, res: Response) =
     });
 };
 
-export const handleGetBoardByGroupId: RequestHandler = (req: Request, res: Response) => {
+export const handleGetBoardByGroupId: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
   const { group } = req.params;
   if (!boards.groups.has(group)) {
     fillDefault(group);
@@ -111,7 +169,10 @@ export const handleGetBoardByGroupId: RequestHandler = (req: Request, res: Respo
     .json(Object.fromEntries(boards.groups.get(group)?.entries()!));
 };
 
-export const handleUpdateBoardWithGroupId: RequestHandler = (req: Request, res: Response) => {
+export const handleUpdateBoardWithGroupId: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
   const { group } = req.params;
   const newBoard = new Map();
   for (const [key, value] of Object.entries(req.body)) {

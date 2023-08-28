@@ -11,16 +11,16 @@ import {
   AdjustmentsHorizontalIcon,
 } from "@heroicons/react/24/solid";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/Components/ui/avatar";
+
 // Array of different colours in hex notation
-const colourHex = ["#308a00", "#0b008a", "#8a1900", "#8a008a", "#8a8a00"];
-const users = [
-  "Lachlan Mayer",
-  "James Lew",
-  "Liam O'Kane",
-  "Person 4",
-  "Person 5",
-  "Person 6",
+const colourHex = [
+  "bg-blue-500",
+  "bg-red-500",
+  "bg-green-500",
+  "bg-yellow-500",
 ];
+const users = ["LM", "JL", "LK", "P4", "P5", "P6"];
 function TaskSideBar() {
   return (
     <aside className="w-[3rem] hover:w-[25rem] bg-zinc-200/40 dark:bg-zinc-900/50  transition-all  ">
@@ -32,29 +32,21 @@ function TaskSideBar() {
           <div className="ml-2 mr-3 ">
             {/*Sample Avatar, Replace Dynamically with Users*/}
 
-            {/*This should be the avatar of the current user */}
-            {/* <Avatar
-              className="cursor-pointer"
-              name="Jared Tucker"
-              round
-              size="32"
-              color="#0055D1"
-            /> */}
+            <Avatar className="w-9 h-9 ">
+              <AvatarImage />
+              <AvatarFallback className="bg-red-500">JT</AvatarFallback>
+            </Avatar>
           </div>
           {/*This should be the avatar of the other team members within the kanban board*/}
           <div className="flex -space-x-1">
             {users.slice(0, 4).map((user: string, index: number) => {
               return (
-                // <Avatar
-                //   key={user}
-                //   className="cursor-pointer"
-                //   round
-                //   size="32"
-                //   color={colourHex[index]}
-                //   name={user}
-                // />
-                <>
-                </>
+                <Avatar className="w-9 h-9" key={user}>
+                  <AvatarImage />
+                  <AvatarFallback className={`${colourHex[index]}`}>
+                    {user}
+                  </AvatarFallback>
+                </Avatar>
               );
             })}
           </div>

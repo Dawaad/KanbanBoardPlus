@@ -152,7 +152,7 @@ function Login() {
     <>
       <div className="relative overflow-hidden h-[100dvh]" id="container">
         <div
-          className="absolute top-0 bg-zinc-200 dark:bg-zinc-900 h-full transition-transform duration-[300ms] -left-1/3 w-2/3 opacity-0 z-[1] flex justify-center"
+          className="absolute top-0 bg-zinc-200 dark:bg-zinc-900 h-full transition-transform duration-[200ms] -left-1/3 w-2/3 opacity-0 z-[1] flex justify-center"
           id="sign-up-container"
         >
           <section className="flex justify-center items-center flex-col px-12 text-center h-full w-1/2">

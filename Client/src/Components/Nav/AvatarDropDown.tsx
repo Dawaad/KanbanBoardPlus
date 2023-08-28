@@ -11,7 +11,7 @@ import {
 } from "@/Components/ui/dropdown-menu";
 
 import { Auth } from "firebase/auth";
-
+import { useNavigate } from "react-router-dom";
 import {
   UserIcon,
   CogIcon,
@@ -21,7 +21,12 @@ import {
 import { NewspaperIcon } from "@heroicons/react/24/solid";
 
 function AvatarDropDown({ auth }: { auth: Auth }) {
-  const handleLogout = () => {};
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    auth.signOut().then(() => {
+      navigate("/");
+    });
+  };
 
   return (
     <DropdownMenu>
@@ -57,7 +62,12 @@ function AvatarDropDown({ auth }: { auth: Auth }) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem className="hover:bg-zinc-200 dark:hover:bg-zinc-800 cursor-pointer">
+          <DropdownMenuItem
+            onClick={() => {
+              handleLogout();
+            }}
+            className="hover:bg-zinc-200 dark:hover:bg-zinc-800 cursor-pointer"
+          >
             <ArrowRightOnRectangleIcon className="w-5 h-5 mr-2" />
             <span>Logout</span>
           </DropdownMenuItem>

@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import useBoards from "@/Hooks/useBoards";
+import { Skeleton } from "../ui/skeleton";
 function Sideboard() {
   const boards = useBoards();
 
@@ -12,16 +13,13 @@ function Sideboard() {
         </header>
         <section className="my-3  pb-3  dark:border-b-zinc-400/60">
           <ul className="mx-6 space-y-2 ">
-            {/* {[1, 2, 3, 4, 5].map((index) => {
-              return (
-                <li className="text-sm font-semibold dark:text-zinc-400">
-                  Project {index}
-                </li>
-              );
-            })} */}
             {/* todo: Update Loading Component */}
             {boards.loading ? (
-              <div>Loading Cuz</div>
+              <section className="space-y-4">
+                {[1, ...Array(6)].map((index:number) => {
+                  return <Skeleton key={`skeleton-sideboard-${index}`} className="w-24 h-3 m-1" />;
+                })}
+              </section>
             ) : (
               boards.boards.map((board) => {
                 return (

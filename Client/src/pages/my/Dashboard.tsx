@@ -5,8 +5,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import useBoards from "@/Hooks/useBoards";
 import axios from "axios";
+import { Skeleton } from "@/Components/ui/skeleton";
 import DashboardTile from "../../Components/Dash/DashboardTile";
 import CreateModal from "../../Components/Dash/Create";
+import LoadingTiles from "@/Components/Dash/LoadingTiles";
 function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -48,7 +50,7 @@ function Dashboard() {
             <div className="grid grid-cols-2 md:flex flex-row flex-wrap p-4">
               {/* todo: Update Loading Component */}
               {boards.loading ? (
-                <div>Loading Cuz</div>
+                <LoadingTiles/>
               ) : (
                 boards.boards
                   .filter((board) => board.owner)
@@ -83,7 +85,7 @@ function Dashboard() {
             <div className="grid grid-cols-2 md:flex flex-row flex-wrap p-4">
               {/* todo: Update Loading Component */}
               {boards.loading ? (
-                <div>Loading Cuz</div>
+                <LoadingTiles/>
               ) : (
                 boards.boards
                   .filter((board) => !board.owner)

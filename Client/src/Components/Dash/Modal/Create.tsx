@@ -1,6 +1,6 @@
 import { Fragment, useRef, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { Input } from "../ui/input";
+import { Input } from "../../ui/input";
 import { getAuth } from "firebase/auth";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";

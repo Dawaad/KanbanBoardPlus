@@ -6,34 +6,10 @@ import { useParams } from 'react-router-dom';
 import BoardColumn from "./BoardColumn";
 
 function TaskBoardComp() {
-  const { group } = useParams();
+  
   const [columns, setColumns] = useState(new Map());
 
-  // useEffect(() => {
-  //   // get the columns from the database
-  //   console.log('here');
-  //   console.log(axios.get(`http://localhost:3000/api/boards/group/get/${group}`)
-  //     .then(({ data }) => { // TODO: make type for this
-  //       const newColumns = new Map();
-  //       for (const [key, value] of Object.entries(data)) {
-  //         newColumns.set(key, value);
-  //       }
-  //       console.log(data);
-  //       setColumns(newColumns);
-  //     })
-  //     .catch(err => {
-  //       console.log(err);
-  //       console.log('poop'); // TODO: handle can't reach server
-  //     }));
-
-  // }, []);
-
-  // const syncSetColumns = (columns: any) => {
-  //   setColumns(columns);
-
-  //   // send columns to the server
-  //   axios.post(`http://localhost:3000/api/boards/group/create/${group}`, Object.fromEntries(columns));
-  // };
+  
 
   const handleOnDragEnd = (result: DropResult) => {
     const { destination, source, type } = result;

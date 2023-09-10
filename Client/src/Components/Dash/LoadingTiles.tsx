@@ -6,6 +6,8 @@ function LoadingTiles() {
       <Skeleton className="m-4 md:w-[11rem] lg:w-[13rem] h-[7rem] rounded-md" />
       <Skeleton className="m-4 md:w-[11rem] lg:w-[13rem] h-[7rem] rounded-md" />
       <Skeleton className="m-4 md:w-[11rem] lg:w-[13rem] h-[7rem] rounded-md" />
+      <Skeleton className="m-4 md:w-[11rem] lg:w-[13rem] h-[7rem] rounded-md" />
+      <Skeleton className="m-4 md:w-[11rem] lg:w-[13rem] h-[7rem] rounded-md" />
     </section>
   );
 }

@@ -16,7 +16,7 @@ function Sideboard() {
             {/* todo: Update Loading Component */}
             {boards.loading ? (
               <section className="space-y-4">
-                {[1, ...Array(6)].map((index: number) => {
+                {[1, ...Array(6)].map((_,index: number) => {
                   return (
                     <Skeleton
                       key={`skeleton-sideboard-${index}`}

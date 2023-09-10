@@ -3,7 +3,7 @@ import Sideboard from "../../Components/Dash/Sideboard";
 import { User, onAuthStateChanged, getAuth, Auth } from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import useBoards from "@/Hooks/useBoards";
+import useBoardTiles from "@/Hooks/useBoardsTile";
 import axios from "axios";
 import { Skeleton } from "@/Components/ui/skeleton";
 import DashboardTile from "../../Components/Dash/DashboardTile";
@@ -25,7 +25,7 @@ function Dashboard() {
     });
   }, []);
 
-  const boards = useBoards();
+  const boards = useBoardTiles();
 
   const changeOpenState = (state: boolean) => {
     setCreateModal(state);
@@ -38,6 +38,7 @@ function Dashboard() {
           <Sideboard />
         </aside>
         <main className="p-4">
+          
           <h1 className="hidden md:block md:text-2xl lg:text-4xl font-bold  my-4 text-zinc-800/80 dark:text-zinc-200">
             Hello, {user?.displayName}
           </h1>
@@ -50,7 +51,7 @@ function Dashboard() {
             <div className="grid grid-cols-2 md:flex flex-row flex-wrap p-4">
               {/* todo: Update Loading Component */}
               {boards.loading ? (
-                <LoadingTiles/>
+                <LoadingTiles />
               ) : (
                 boards.boards
                   .filter((board) => board.owner)
@@ -85,7 +86,7 @@ function Dashboard() {
             <div className="grid grid-cols-2 md:flex flex-row flex-wrap p-4">
               {/* todo: Update Loading Component */}
               {boards.loading ? (
-                <LoadingTiles/>
+                <LoadingTiles />
               ) : (
                 boards.boards
                   .filter((board) => !board.owner)

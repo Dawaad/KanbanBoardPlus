@@ -3,7 +3,7 @@ import { Auth, getAuth, onAuthStateChanged } from "firebase/auth";
 import axios from "axios";
 import { TDashTile } from "@/Types/TDashTile";
 
-function useBoards() {
+function useBoardTiles () {
   const [boards, setBoards] = useState<TDashTile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -52,4 +52,4 @@ function useBoards() {
   return { boards, error, loading };
 }
 
-export default useBoards;
+export default useBoardTiles ;

@@ -28,7 +28,7 @@ function DashboardTile({ className, boardDetails, ...props }: Props) {
     <Link
       to={`board/${boardDetails?.id}`}
       className={cn(
-        "m-4 md:w-[11rem] lg:w-[13rem] h-[7rem] transition-all bg-slate-400 flex justify-center items-center shadow-md shadow-zinc-800 dark:shadow-none rounded-md hover:opacity-70",
+        "m-4 md:w-[11rem] lg:w-[13rem] h-[7rem] transition-all bg-slate-300 flex justify-center items-center shadow-md shadow-zinc-800 dark:shadow-none rounded-md hover:opacity-70",
         className
       )}
       {...props}

@@ -9,31 +9,31 @@ function TaskBoardComp() {
   const { group } = useParams();
   const [columns, setColumns] = useState(new Map());
 
-  useEffect(() => {
-    // get the columns from the database
-    console.log('here');
-    console.log(axios.get(`http://localhost:3000/api/boards/group/get/${group}`)
-      .then(({ data }) => { // TODO: make type for this
-        const newColumns = new Map();
-        for (const [key, value] of Object.entries(data)) {
-          newColumns.set(key, value);
-        }
-        console.log(data);
-        setColumns(newColumns);
-      })
-      .catch(err => {
-        console.log(err);
-        console.log('poop'); // TODO: handle can't reach server
-      }));
+  // useEffect(() => {
+  //   // get the columns from the database
+  //   console.log('here');
+  //   console.log(axios.get(`http://localhost:3000/api/boards/group/get/${group}`)
+  //     .then(({ data }) => { // TODO: make type for this
+  //       const newColumns = new Map();
+  //       for (const [key, value] of Object.entries(data)) {
+  //         newColumns.set(key, value);
+  //       }
+  //       console.log(data);
+  //       setColumns(newColumns);
+  //     })
+  //     .catch(err => {
+  //       console.log(err);
+  //       console.log('poop'); // TODO: handle can't reach server
+  //     }));
 
-  }, []);
+  // }, []);
 
-  const syncSetColumns = (columns: any) => {
-    setColumns(columns);
+  // const syncSetColumns = (columns: any) => {
+  //   setColumns(columns);
 
-    // send columns to the server
-    axios.post(`http://localhost:3000/api/boards/group/create/${group}`, Object.fromEntries(columns));
-  };
+  //   // send columns to the server
+  //   axios.post(`http://localhost:3000/api/boards/group/create/${group}`, Object.fromEntries(columns));
+  // };
 
   const handleOnDragEnd = (result: DropResult) => {
     const { destination, source, type } = result;
@@ -43,7 +43,7 @@ function TaskBoardComp() {
       const entries = Array.from(columns.entries());
       const [removed] = entries.splice(source.index, 1);
       entries.splice(destination.index, 0, removed);
-      syncSetColumns(new Map(entries));
+      // syncSetColumns(new Map(entries));
     }
     //Card Drag
     if (type === "card") {
@@ -70,7 +70,7 @@ function TaskBoardComp() {
 
         const [removed] = tasks.splice(source.index, 1);
         tasks.splice(destination.index, 0, removed);
-        syncSetColumns(new Map(columns.set(sourceColumn, tasks)));
+        // syncSetColumns(new Map(columns.set(sourceColumn, tasks)));
       }
       //Different Column
       else {
@@ -81,11 +81,11 @@ function TaskBoardComp() {
 
         const [removed] = sourceTasks.splice(source.index, 1);
         destTasks.splice(destination.index, 0, removed);
-        syncSetColumns(
-          new Map(
-            columns.set(sourceColumn, sourceTasks).set(destColumn, destTasks)
-          )
-        );
+        // syncSetColumns(
+        //   new Map(
+        //     columns.set(sourceColumn, sourceTasks).set(destColumn, destTasks)
+        //   )
+        // );
       }
     }
   };

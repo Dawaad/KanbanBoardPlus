@@ -1,9 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import useBoards from "@/Hooks/useBoards";
+import useBoardTiles from "@/Hooks/useBoardsTile";
 import { Skeleton } from "../ui/skeleton";
 function Sideboard() {
-  const boards = useBoards();
+  const boards = useBoardTiles();
 
   return (
     <div className="w-[15rem] lg:w-[17rem] h-full py-4  border-r border-r-zinc-600/60  dark:border-r-zinc-400/60">
@@ -16,8 +16,13 @@ function Sideboard() {
             {/* todo: Update Loading Component */}
             {boards.loading ? (
               <section className="space-y-4">
-                {[1, ...Array(6)].map((index:number) => {
-                  return <Skeleton key={`skeleton-sideboard-${index}`} className="w-24 h-3 m-1" />;
+                {[1, ...Array(6)].map((index: number) => {
+                  return (
+                    <Skeleton
+                      key={`skeleton-sideboard-${index}`}
+                      className="w-24 h-3 m-1"
+                    />
+                  );
                 })}
               </section>
             ) : (

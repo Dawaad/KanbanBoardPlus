@@ -36,7 +36,7 @@ const routes = (
     </Route>
     <Route path="/my" element={<UserLayout />}>
       <Route index element={<Dashboard />} />
-      <Route path="board/:group" element={<TaskBoard />} />
+      <Route path="board/:boardID" element={<TaskBoard />} />
     </Route>
     <Route path="/loginerror" element={<LoginError />} />
     <Route path="*" element={<Error />} />

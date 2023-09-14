@@ -20,7 +20,8 @@ function Layout({ children }: { children: React.ReactNode }) {
       }
     }
   };
-
+  
+  // Check user's theme preference and set it
   useEffect(() => {
     if (html) {
       if (userTheme === "dark" || systemTheme === "dark") {

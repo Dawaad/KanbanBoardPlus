@@ -1,9 +1,11 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import axios from "axios";
+
 function useInvite(boardID: string) {
   const [inviteCode, setInviteCode] = useState("");
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const getInviteCode = async () => {
       console.log(boardID);
@@ -33,6 +35,7 @@ function useInvite(boardID: string) {
     };
     getInviteCode();
   }, []);
+  
   return { inviteCode, loading };
 }
 

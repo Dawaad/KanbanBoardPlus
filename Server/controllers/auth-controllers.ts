@@ -20,7 +20,7 @@ export const handleCreateUser: RequestHandler = (req: Request, res: Response) =>
   }
 };
 
-// Tiny little check to see if get user works
+// get Users By ID
 export const handleGetUserById: RequestHandler = (req: Request, res: Response) => {
   const userRef = doc(db, "users", req.params.userId);
   getDoc(userRef).then((userSnap: DocumentSnapshot) => {

@@ -36,7 +36,7 @@ function TaskSideBar(boardID: boardProps) {
       >
         <div className="flex items-center overflow-hidden pb-2">
           <div className="ml-2 mr-3 ">
-            {/*Sample Avatar, Replace Dynamically with Users*/}
+            {/*Sample Avatar, Replace Dynamically with User's*/}
 
             <Avatar className="w-9 h-9 ">
               <AvatarImage />

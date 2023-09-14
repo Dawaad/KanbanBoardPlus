@@ -5,6 +5,7 @@ import {
   DraggableProvidedDragHandleProps,
   DraggableProvidedDraggableProps,
 } from "react-beautiful-dnd";
+
 type CardProps = {
   task: string;
   index: number;
@@ -13,9 +14,9 @@ type CardProps = {
   dragHandleProps: DraggableProvidedDragHandleProps | null | undefined;
   draggableProps: DraggableProvidedDraggableProps;
 };
+
 function ColumnCard({
   task,
-
   innerRef,
   dragHandleProps,
   draggableProps,
@@ -36,6 +37,7 @@ function ColumnCard({
           </div>
         </div>
         <button
+          //todo add popup for cards when clicked
           onClick={() => {}}
           className=" items-center text-red-500 hover:text-red-700 "
         >

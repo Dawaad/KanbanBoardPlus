@@ -16,6 +16,7 @@ import {
   DocumentReference,
 } from "firebase/firestore";
 
+// Get all boards for a user by userID
 export const handleBoardsUserId: RequestHandler = (
   req: Request,
   res: Response
@@ -36,6 +37,7 @@ export const handleBoardsUserId: RequestHandler = (
   });
 };
 
+// get board by board id
 export const handleSingleBoardBoardId: RequestHandler = (
   req: Request,
   res: Response
@@ -44,6 +46,7 @@ export const handleSingleBoardBoardId: RequestHandler = (
   const boardRef = doc(db, "boards", boardID);
 };
 
+// get boards by a list of board ids
 export const handleManyBoardBoardId: RequestHandler = (
   req: Request,
   res: Response
@@ -70,6 +73,7 @@ export const handleManyBoardBoardId: RequestHandler = (
   });
 };
 
+// create a new board
 export const handleCreateBoard: RequestHandler = (
   req: Request,
   res: Response

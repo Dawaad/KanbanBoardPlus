@@ -15,7 +15,6 @@ function BoardColumn({
   column,
   id,
   tasks,
-
 }: BoardProps) {
   return (
     <Draggable draggableId={id} index={index}>

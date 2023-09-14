@@ -33,11 +33,13 @@ function useBoardTiles() {
                   setLoading(false);
                 })
                 .catch((err) => {
+                  // Error in UserBoards
                   console.log(err);
                   setError(true);
                 });
             })
             .catch((err) => {
+              // Error in getting user
               console.log(err);
               setError(true);
             });

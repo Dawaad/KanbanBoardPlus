@@ -14,14 +14,14 @@ function TaskBoardComp() {
   const handleOnDragEnd = (result: DropResult) => {
     const { destination, source, type } = result;
     if (!destination) return;
-    //Column Drag
+    //Rearrange Column Drag
     if (type === "column") {
       const entries = Array.from(columns.entries());
       const [removed] = entries.splice(source.index, 1);
       entries.splice(destination.index, 0, removed);
       // syncSetColumns(new Map(entries));
     }
-    //Card Drag
+    //Rearrange Card Drag
     if (type === "card") {
       // console.log(source.index, destination.index)
 
@@ -69,7 +69,6 @@ function TaskBoardComp() {
   return (
     <DragDropContext onDragEnd={handleOnDragEnd}>
       {/*Board*/}
-
       <Droppable droppableId="board" direction="horizontal" type="column">
         {(provided) => (
           <div

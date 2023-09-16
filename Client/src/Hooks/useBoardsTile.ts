@@ -15,7 +15,7 @@ function useBoardTiles() {
         if (user) {
           console.log("User is signed in");
           axios
-            .get(`http://localhost:3000/api/boards/${user.uid}`)
+            .get(`http://localhost:3000/api/boards/user-id/${user.uid}`)
             .then((res) => {
               //Returns an array of board id
               const boardIDs = res.data;

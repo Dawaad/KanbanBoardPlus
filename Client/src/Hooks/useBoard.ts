@@ -22,7 +22,7 @@ function useBoard(boardID: string | undefined) {
       onAuthStateChanged(auth, (user) => {
         //Retrieve board from endpoint
         axios
-          .get(`http://localhost:3000/api/boards/board/get/${boardID}`)
+          .get(`http://localhost:3000/api/boards/board-id/${boardID}`)
           .then((res) => {
             //Parse Board Data into Type
             const boardData: TBoard = res.data;

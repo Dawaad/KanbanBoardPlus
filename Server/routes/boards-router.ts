@@ -1,13 +1,11 @@
 import { Router } from "express";
-import { handleBoardsUserId, handleSingleBoardBoardId, handleManyBoardBoardId, handleCreateBoard, handleGetBoardById} from "../controllers/boards-controllers";
+import { handleBoardsUserId, handleManyBoardBoardId, handleCreateBoard, handleGetBoardById} from "../controllers/boards-controllers";
 
 const boardsRouter = Router();
 
-boardsRouter.get("/:userID", handleBoardsUserId);
-boardsRouter.get("/:boardID", handleSingleBoardBoardId)
 boardsRouter.post("/userBoards", handleManyBoardBoardId);
 boardsRouter.post("/create", handleCreateBoard);
-boardsRouter.get("/board/get/:boardID", handleGetBoardById);
-// boardsRouter.post("/group/create/:group", handleUpdateBoardWithGroupId);
+boardsRouter.get("/board-id/:boardID", handleGetBoardById);
+boardsRouter.get("/user-id/:userID", handleBoardsUserId);
 
 export default boardsRouter;

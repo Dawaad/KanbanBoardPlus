@@ -15,7 +15,7 @@ import { Auth, User, getAuth, onAuthStateChanged } from "firebase/auth";
 import { PlusIcon } from "lucide-react";
 import { Input } from "@/Components/ui/input";
 import axios from "axios";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 type InviteProps = {
   userID: string | undefined;
 };

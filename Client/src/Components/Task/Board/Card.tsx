@@ -1,3 +1,4 @@
+import { TTask } from "@/Types/FirebaseTypes";
 import { XCircleIcon } from "@heroicons/react/20/solid";
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
 
@@ -7,13 +8,14 @@ import {
 } from "react-beautiful-dnd";
 
 type CardProps = {
-  task: string;
+  task: TTask;
   index: number;
-  id: string;
   innerRef: (element: HTMLElement | null) => void;
   dragHandleProps: DraggableProvidedDragHandleProps | null | undefined;
   draggableProps: DraggableProvidedDraggableProps;
 };
+
+// TODO: Refactor Card for support with Update Task model
 
 function ColumnCard({
   task,
@@ -30,7 +32,9 @@ function ColumnCard({
     >
       <div className="grid grid-cols-4 p-5 h-auto">
         <div className="col-span-3 h-full">
-          <div className="font-semibold break-words dark:text-zinc-300 ">{task}</div>
+          <div className="font-semibold break-words dark:text-zinc-300 ">
+            {task.title}
+          </div>
           <div className="flex  items-center space-x-2 text-zinc-500 dark:text-zinc-400 text-sm">
             <CheckCircleIcon className="h-4 w-4" />
             <p>0/5</p>

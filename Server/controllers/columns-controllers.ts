@@ -9,22 +9,56 @@ import {
   deleteDoc,
   updateDoc,
 } from "firebase/firestore";
+import { TBoard, TColumn } from "../types/types";
 
 // create column
-export const handleCreateColumn: RequestHandler = (req: Request, res: Response) => {
-  const columnData = req.body.column;
+export const handleCreateColumn: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
+  const columnTitle = req.body.columnTitle;
+  const boardID = req.body.boardID;
+  const columnRef = collection(db, "columns");
+  //Add New Column Entry and set Title
+  addDoc(columnRef, { title: columnTitle, tasks: [] }).then((docRef) => {
+    const columnID = docRef.id;
+    const insertedColumn: TColumn = {
+      title: columnTitle,
+      tasks: [],
+      id: columnID,
+    };
 
-  addDoc(collection(db, "columns"), columnData)
-    .then(() => {
-      console.log("New column created!");
-    })
-    .catch((error) => {
-      console.error("Error writing document: ", error);
+    //Retrieve Board Document
+    const boardRef = doc(db, "boards", boardID);
+    getDoc(boardRef).then((boardSnap: DocumentSnapshot) => {
+      if (boardSnap.exists()) {
+        const board = boardSnap.data();
+        const updatedColumns = {
+          ...board.columns,
+          [columnID]: docRef,
+        };
+
+        //Update Board Document with new column
+        updateDoc(boardRef, { columns: updatedColumns })
+          .then(() => {
+            console.log("Board Document Updated");
+            res.status(200).send(insertedColumn);
+          })
+          .catch((err) => {
+            res.status(500).send(err);
+          });
+      }
     });
+  });
+
+  //Once Column has been created, retrieve reference and add to Column Map in the board doucment
 };
 
 // get column by id
-export const handleGetColumnById: RequestHandler = (req: Request, res: Response) => {
+export const handleGetColumnById: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
   const columnRef = doc(db, "columns", req.params.columnId);
 
   getDoc(columnRef).then((columnSnap: DocumentSnapshot) => {
@@ -39,7 +73,10 @@ export const handleGetColumnById: RequestHandler = (req: Request, res: Response)
 };
 
 // delete column by id
-export const handleDeleteColumnById: RequestHandler = (req: Request, res: Response) => {
+export const handleDeleteColumnById: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
   const columnRef = doc(db, "columns", req.params.columnId);
 
   deleteDoc(columnRef)
@@ -52,7 +89,10 @@ export const handleDeleteColumnById: RequestHandler = (req: Request, res: Respon
 };
 
 // update column by id
-export const handleUpdateColumnById: RequestHandler = (req: Request, res: Response) => {
+export const handleUpdateColumnById: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
   const columnRef = doc(db, "columns", req.params.columnId);
   const columnChanges = req.body.column;
 

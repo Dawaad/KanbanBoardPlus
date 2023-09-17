@@ -1,11 +1,16 @@
 import { Router } from "express";
-import { handleCreateColumn, handleDeleteColumnById, handleGetColumnById, handleUpdateColumnById } from "../controllers/columns-controllers";
+import {
+  handleCreateColumn,
+  handleDeleteColumnById,
+  handleGetColumnById,
+  handleUpdateColumnById,
+} from "../controllers/columns-controllers";
 
 const columnsRouter = Router();
 
-columnsRouter.post("/columns", handleCreateColumn);
-columnsRouter.get("/columns/:columnId", handleGetColumnById);
-columnsRouter.delete("/columns/:columnId", handleDeleteColumnById);
-columnsRouter.put("/columns/:columnId", handleUpdateColumnById);
+columnsRouter.post("/create", handleCreateColumn);
+columnsRouter.get("/:columnId", handleGetColumnById);
+columnsRouter.delete("/:columnId", handleDeleteColumnById);
+columnsRouter.put("/:columnId", handleUpdateColumnById);
 
 export default columnsRouter;

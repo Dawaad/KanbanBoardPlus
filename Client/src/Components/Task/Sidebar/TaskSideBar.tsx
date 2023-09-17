@@ -10,9 +10,10 @@ import {
   ArchiveBoxArrowDownIcon,
   AdjustmentsHorizontalIcon,
 } from "@heroicons/react/24/solid";
-import SidebarSegment from "@/Components/Task/Board/Sidebar/SidebarSection";
-import InviteModal from "./Modals/InviteModal";
+import SidebarSegment from "@/Components/Task/Sidebar/SidebarSection";
+import InviteModal from "../Modals/InviteModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/Components/ui/avatar";
+import { TBoard } from "@/Types/FirebaseTypes";
 
 // Array of different colours in hex notation
 const colourHex = [
@@ -24,10 +25,10 @@ const colourHex = [
 const users = ["LM", "JL", "LK", "P4", "P5", "P6"];
 
 type boardProps = {
-  boardID: string;
-}
+  board: TBoard;
+};
 
-function TaskSideBar(boardID: boardProps) {
+function TaskSideBar(board: boardProps) {
   return (
     <aside className="w-[3rem] hover:w-[25rem] bg-zinc-200/40 dark:bg-zinc-900/50  transition-all  ">
       <section
@@ -70,7 +71,7 @@ function TaskSideBar(boardID: boardProps) {
             onClick: () => {
               console.log("Invite Others Clicked");
             },
-            modal: <InviteModal boardID={boardID.boardID} />,
+            modal: <InviteModal board={board.board} />,
           }}
         />
       </section>

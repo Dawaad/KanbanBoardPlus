@@ -10,14 +10,16 @@ import {
 } from "@/Components/ui/alert-dialog";
 import useInvite from "@/Hooks/useInvite";
 import { Skeleton } from "@/Components/ui/skeleton";
+import { TBoard } from "@/Types/FirebaseTypes";
 type InviteProps = {
-  boardID: string;
+  board: TBoard;
 };
 
-function InviteModal(boardID: InviteProps) {
-  console.log(boardID.boardID);
-  const invite = useInvite(boardID.boardID);
-
+function InviteModal(board: InviteProps) {
+  if (!board.board) {
+    return null;
+  }
+  const invite = useInvite(board.board.id);
   return (
     <AlertDialogContent>
       <AlertDialogHeader>

@@ -11,7 +11,7 @@ const isUserInBoard = (board: TBoard, userID: string): boolean => {
 
 function useBoard(boardID: string | undefined) {
   const [error, setError] = useState(false);
-  const [board, setBoard] = useState<TBoard | null>();
+  const [board, setBoard] = useState<TBoard | undefined>();
   const [userAccess, setUserAccess] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
 
@@ -25,6 +25,7 @@ function useBoard(boardID: string | undefined) {
           .get(`http://localhost:3000/api/boards/board-id/${boardID}`)
           .then((res) => {
             //Parse Board Data into Type
+
             const boardData: TBoard = res.data;
 
             //Check if user is in board
@@ -37,14 +38,16 @@ function useBoard(boardID: string | undefined) {
             setLoading(false);
           })
           .catch((err) => {
-            console.log(err);
+            console.log(err)
+            setLoading(false);
+            setBoard(undefined);
             setError(true);
           });
       });
     };
     fetchBoard();
   }, []);
-
+  console.log(board)
   return { board, userAccess, loading, error };
 }
 

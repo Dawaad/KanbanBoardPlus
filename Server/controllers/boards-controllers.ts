@@ -313,10 +313,9 @@ export const handleGetBoardById: RequestHandler = async (
     };
 
     res.send(board).status(200);
-
-    
   } catch (error) {
+    console.log("hey");
     console.error("Error retrieving board:", error);
-    return null;
+    res.send(error).status(500);
   }
 };

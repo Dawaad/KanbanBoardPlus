@@ -4,6 +4,7 @@ import TaskSideBar from "../../Components/Task/Board/Sidebar/TaskSideBar";
 import { useNavigate, useParams } from "react-router-dom";
 import useBoard from "@/Hooks/useBoard";
 import LoadingSkeleton from "@/Components/Task/Board/LoadingSkeleton";
+import { TBoard } from "@/Types/FirebaseTypes";
 function TaskBoard() {
   //Retrieve Board ID from params
   const { boardID } = useParams();
@@ -11,12 +12,20 @@ function TaskBoard() {
   if (!boardID) {
     navigate("/dashboard");
   }
+
   //Commented Out while I work on other features not including the board
-  // const board = useBoard(boardID);
+  const userBoard = useBoard(boardID);
 
-  //Access Firebase With Board ID
+  const { board, userAccess, loading, error } = userBoard;
 
-  //If user is not a member of the board, redirect to dashboard
+  // If server cannot located board, redirect to dashboard
+  useEffect(() => {
+    if (!loading) {
+      if (!board || !userAccess) {
+        navigate("/my");
+      }
+    }
+  }, [board, loading]);
 
   return (
     <main className="overflow-hidden flex flex-row h-[100dvh]">
@@ -25,7 +34,11 @@ function TaskBoard() {
       <TaskSideBar boardID={boardID as string} />
 
       <section className="overflow-x-scroll my-2 scrollbar scrollbar-thumb-zinc-700/50 dark:scrollbar-thumb-zinc-400/70 scrollbar-thumb-rounded-lg flex ">
-        {/* {board.loading ? <LoadingSkeleton/> : <TaskBoardComp />} */}
+        {loading ? (
+          <LoadingSkeleton />
+        ) : (
+          <TaskBoardComp board={board as TBoard} />
+        )}
       </section>
     </main>
   );

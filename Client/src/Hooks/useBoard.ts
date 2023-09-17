@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Auth, getAuth, onAuthStateChanged } from "firebase/auth";
-import { TBoard, TUser } from "@/Types/FirebaseTypes";
+import { TBoard, TColumn, TUser } from "@/Types/FirebaseTypes";
 
 const isUserInBoard = (board: TBoard, userID: string): boolean => {
   const allUsers: TUser[] = [...board.adminUsers, ...board.memberUsers];
@@ -26,7 +26,18 @@ function useBoard(boardID: string | undefined) {
           .then((res) => {
             //Parse Board Data into Type
 
-            const boardData: TBoard = res.data;
+            const data = res.data;
+
+            //Convert Column Object back into Map
+            const columnMap = new Map<string, TColumn>();
+            Object.entries(data.columns).forEach(([key, value]) => {
+              columnMap.set(key, value as TColumn);
+            });
+
+            const boardData: TBoard = {
+              ...data,
+              columns: columnMap,
+            };
 
             //Check if user is in board
             const userInBoard = isUserInBoard(boardData, user?.uid || "");
@@ -38,7 +49,7 @@ function useBoard(boardID: string | undefined) {
             setLoading(false);
           })
           .catch((err) => {
-            console.log(err)
+            console.log(err);
             setLoading(false);
             setBoard(undefined);
             setError(true);
@@ -47,7 +58,7 @@ function useBoard(boardID: string | undefined) {
     };
     fetchBoard();
   }, []);
-  console.log(board)
+  console.log(board);
   return { board, userAccess, loading, error };
 }
 

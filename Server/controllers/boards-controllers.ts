@@ -2,6 +2,7 @@ import { Request, RequestHandler, Response } from "express";
 import { db } from "../database/firebase";
 import { TBoard, TUser, TColumn, TTask } from "../types/types";
 import { TDashTile } from "../types/types";
+import { isEmpty } from "lodash";
 import {
   addDoc,
   updateDoc,
@@ -218,15 +219,17 @@ export const handleGetBoardById: RequestHandler = async (
     const columnsRef = boardData.columns as Map<string, DocumentReference>;
     //If map is not empty, retrieve all columns
 
-    if (columnsRef.size !== undefined) {
-      const columnsPromises: Promise<TColumn | null>[] = Array.from(
-        columnsRef.values()
-      ).map(async (columnRef) => {
+    if (!isEmpty(columnsRef)) {
+      const columnsPromises: Promise<TColumn | null>[] = Object.values(
+        columnsRef
+      ).map(async (columnRef: DocumentReference) => {
         const columnDoc = await getDoc(columnRef);
         if (columnDoc.exists()) {
           const columnData = columnDoc.data();
+
           if (columnData) {
             const tasksRef = columnData.tasks as DocumentReference[];
+
             const tasksPromises: Promise<TTask | null>[] = tasksRef.map(
               async (taskRef) => {
                 const taskDoc = await getDoc(taskRef);
@@ -276,10 +279,11 @@ export const handleGetBoardById: RequestHandler = async (
             ) as TTask[];
 
             const column: TColumn = {
-              id: columnData.id,
+              id: columnDoc.id,
               title: columnData.title,
               tasks: tasks,
             };
+
             return column;
           }
         }
@@ -289,17 +293,20 @@ export const handleGetBoardById: RequestHandler = async (
         (column) => column !== null
       ) as TColumn[];
 
-      const board: TBoard = {
+      const columnMap = new Map<string, TColumn>(
+        columns.map((column) => [column.id, column])
+      );
+
+      const board = {
         id: boardData.id,
         ownerID: owner,
         title: boardData.title,
-        columns: new Map<string, TColumn>(
-          columns.map((column) => [column.id, column])
-        ),
+        columns: Object.fromEntries(columnMap),
         adminUsers: adminUsers,
         memberUsers: memberUsers,
       };
       res.send(board).status(200);
+
       return;
     }
 
@@ -312,9 +319,9 @@ export const handleGetBoardById: RequestHandler = async (
       memberUsers: memberUsers,
     };
 
+    console.log("no columns");
     res.send(board).status(200);
   } catch (error) {
-    console.log("hey");
     console.error("Error retrieving board:", error);
     res.send(error).status(500);
   }

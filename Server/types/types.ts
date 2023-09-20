@@ -19,12 +19,14 @@ export type TTask = {
   assignedUsers: TUser[];
   assignedDate: Date;
   completedDate: Date | null;
+  
 };
 
 export type TColumn = {
   id: string;
   title: string;
   tasks: TTask[];
+  createdDate: Date;
 };
 
 export type TBoard = {

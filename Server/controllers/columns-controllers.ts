@@ -19,13 +19,19 @@ export const handleCreateColumn: RequestHandler = (
   const columnTitle = req.body.columnTitle;
   const boardID = req.body.boardID;
   const columnRef = collection(db, "columns");
+  const insertionDate = new Date();
   //Add New Column Entry and set Title
-  addDoc(columnRef, { title: columnTitle, tasks: [] }).then((docRef) => {
+  addDoc(columnRef, {
+    title: columnTitle,
+    tasks: [],
+    createdDate: insertionDate,
+  }).then((docRef) => {
     const columnID = docRef.id;
     const insertedColumn: TColumn = {
       title: columnTitle,
       tasks: [],
       id: columnID,
+      createdDate: insertionDate,
     };
 
     //Retrieve Board Document

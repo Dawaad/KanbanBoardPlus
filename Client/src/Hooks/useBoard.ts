@@ -34,6 +34,8 @@ function useBoard(boardID: string | undefined) {
               columnMap.set(key, value as TColumn);
             });
 
+            console.log(columnMap);
+
             const boardData: TBoard = {
               ...data,
               columns: columnMap,

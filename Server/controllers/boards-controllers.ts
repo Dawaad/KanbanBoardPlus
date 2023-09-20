@@ -282,6 +282,7 @@ export const handleGetBoardById: RequestHandler = async (
               id: columnDoc.id,
               title: columnData.title,
               tasks: tasks,
+              createdDate: columnData.createdDate,
             };
 
             return column;
@@ -296,6 +297,8 @@ export const handleGetBoardById: RequestHandler = async (
       const columnMap = new Map<string, TColumn>(
         columns.map((column) => [column.id, column])
       );
+
+      console.log(columnsRef);
 
       const board = {
         id: boardData.id,

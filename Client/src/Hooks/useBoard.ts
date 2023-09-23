@@ -29,14 +29,14 @@ function useBoard(boardID: string | undefined) {
             const data = res.data;
 
             //Convert Column Object back into Map
-            const columnMap = new Map<string, TColumn>();
-            Object.entries(data.columns).forEach(([key, value]) => {
-              columnMap.set(key, value as TColumn);
-            });
 
             const boardData: TBoard = {
-              ...data,
-              columns: columnMap,
+              id: data.id,
+              ownerID: data.ownerID,
+              title: data.title,
+              columns: data.columns,
+              adminUsers: data.adminUsers,
+              memberUsers: data.memberUsers,
             };
 
             //Check if user is in board
@@ -58,7 +58,6 @@ function useBoard(boardID: string | undefined) {
     };
     fetchBoard();
   }, []);
-  console.log(board);
   return { board, userAccess, loading, error };
 }
 

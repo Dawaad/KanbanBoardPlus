@@ -30,6 +30,8 @@ function useBoard(boardID: string | undefined) {
 
             //Convert Column Object back into Map
 
+            console.log(columnMap);
+
             const boardData: TBoard = {
               id: data.id,
               ownerID: data.ownerID,

@@ -27,10 +27,10 @@ export type TColumn = {
   id: string;
   title: string;
   tasks: TTask[];
-  createdDate: Date;
   archived: boolean;
   archivedDate: Date | null;
   backLog: boolean
+  createdDate: Date;
 };
 
 export type TBoard = {

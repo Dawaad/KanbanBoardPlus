@@ -20,11 +20,11 @@ type ColumnModalProps = {
 
 function AddColumn({ callBack }: ColumnModalProps) {
   const [title, setTitle] = useState<string>("");
-  const [error, setError] = useState<boolean>(false);
+  
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button className="ml-5 md:w-72 bg-zinc-100/40 dark:bg-zinc-800/50 text-zinc-800/80 dark:text-zinc-400 hover:bg-zinc-300/80 dark:hover:bg-zinc-700/40 ">
+        <Button className="truncate my-3 md:my-0 absolute top-0 right-0 md:relative ml-5 md:w-72 bg-zinc-100/40 dark:bg-zinc-800/50 text-zinc-800/80 dark:text-zinc-400 hover:bg-zinc-300/80 dark:hover:bg-zinc-700/40 ">
           Add New Column
         </Button>
       </AlertDialogTrigger>

@@ -150,3 +150,9 @@
 #container.right-panel-active #overlay-right {
   transform: translateX(20%);
 }
+
+@media (min-width: 768px) {
+  .column-container {
+    width: calc((288px + 20px) * var(--bColumns-length));
+  }
+}

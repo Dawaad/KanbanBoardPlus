@@ -12,8 +12,38 @@ type boardProps = {
 };
 
 function TaskBoardComp(board: boardProps) {
-  const [bColumns, setBColumns] = useState(board.board.columns);
-  console.log(bColumns);
+  const [bColumns, setBColumns] = useState(
+    board.board.columns.filter((column) => {
+      return !column.archived;
+    })
+  );
+
+  const [direction, setDirection] = useState<"vertical" | "horizontal">(
+    "vertical"
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setDirection(window.innerWidth >= 768 ? "horizontal" : "vertical");
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // Initial direction based on window width
+    handleResize();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--bColumns-length",
+      bColumns.length.toString()
+    );
+  }, [bColumns.length]);
+
   const addNewColumn = (title: string): void => {
     //Add To Firebase and retrieve ID
     axios
@@ -26,15 +56,32 @@ function TaskBoardComp(board: boardProps) {
         if (res.status === 200) {
           const newColumn = res.data;
           //Once Column has been inserted, add to the local state
-          if (bColumns.size) {
-            //Add to the end of the map
-            setBColumns(new Map(bColumns.set(title, newColumn)));
-          } else {
-            //Add to the start of the map
-            setBColumns(new Map().set(title, newColumn));
-          }
+          setBColumns((prev) => {
+            return [...prev, newColumn];
+          });
         }
       });
+  };
+
+  const handleColumnDelete = (columnIndex: number) => {
+    //Remove from Local State
+    const date = new Date();
+
+    if (!bColumns[columnIndex].backLog) {
+      setBColumns((prev) => {
+        const allColumns = [...prev];
+        allColumns[columnIndex].archived = true;
+        allColumns[columnIndex].archivedDate = date;
+        return allColumns.filter((column) => {
+          return !column.archived;
+        });
+      });
+
+      //Remove from Firebase
+      axios.put("http://localhost:3000/api/columns/archive", {
+        columnID: bColumns[columnIndex].id,
+      });
+    }
   };
 
   //Check to see if board has columns
@@ -43,19 +90,36 @@ function TaskBoardComp(board: boardProps) {
     if (!destination) return;
     //Rearrange Column Drag
     if (type === "column") {
-      const entries = Array.from(bColumns.entries());
+      // const entries = Array.from(bColumns.entries());
+      // const [removed] = entries.splice(source.index, 1);
+      // entries.splice(destination.index, 0, removed);
+      // setBColumns(new Map(entries));
+      if (source.index === destination.index) return;
+
+      //Do not allow user to swap the Backlog column
+
+      if (bColumns[source.index].backLog || bColumns[destination.index].backLog)
+        return;
+
+      const entries = bColumns;
       const [removed] = entries.splice(source.index, 1);
       entries.splice(destination.index, 0, removed);
-      setBColumns(new Map(entries));
+      setBColumns(entries);
+      //Console log the index of the swap
+      axios.post("http://localhost:3000/api/columns/swap", {
+        boardID: board.board.id,
+        sourceIndex: source.index,
+        destIndex: destination.index,
+      });
     }
     //Rearrange Card Drag
     if (type === "card") {
       // console.log(source.index, destination.index)
 
       //Retrieve Column Keys
-      const boardColumns = Array.from(bColumns.keys());
-      const sourceColumn = boardColumns[Number(source.droppableId)];
-      const destColumn = boardColumns[Number(destination.droppableId)];
+
+      const sourceColumn = bColumns[Number(source.droppableId)];
+      const destColumn = bColumns[Number(destination.droppableId)];
 
       if (!source || !destination) {
         return;
@@ -72,7 +136,7 @@ function TaskBoardComp(board: boardProps) {
       if (sourceColumn === destColumn) {
         //Retrieve Tasks
 
-        const col: TColumn | undefined = bColumns.get(sourceColumn);
+        const col: TColumn | undefined = sourceColumn;
 
         if (col) {
           const tasks = Array.from(col?.tasks);
@@ -83,13 +147,18 @@ function TaskBoardComp(board: boardProps) {
           //Reassign the new tasks to the column
           const newCol: TColumn = { ...col, tasks: tasks };
 
-          setBColumns(new Map(bColumns.set(sourceColumn, newCol)));
+          //Update the array of columns to reflect this new change in tasks
+          setBColumns((prev) => {
+            const updatedColumns = [...prev];
+            updatedColumns[Number(source.droppableId)] = newCol;
+            return updatedColumns;
+          });
         }
       }
       //Different Column
       else {
-        const sourceCol: TColumn | undefined = bColumns.get(sourceColumn);
-        const destCol: TColumn | undefined = bColumns.get(destColumn);
+        const sourceCol: TColumn | undefined = sourceColumn;
+        const destCol: TColumn | undefined = destColumn;
 
         if (sourceCol && destCol) {
           const sTasks = Array.from(sourceCol?.tasks);
@@ -102,10 +171,12 @@ function TaskBoardComp(board: boardProps) {
           const sourceTasks: TColumn = { ...sourceCol, tasks: sTasks };
           const destTasks: TColumn = { ...destCol, tasks: dTasks };
 
-          setBColumns(() => {
-            return new Map(
-              bColumns.set(sourceColumn, sourceTasks).set(destColumn, destTasks)
-            );
+          //Update the array of columns to reflect this new change in tasks
+          setBColumns((prev) => {
+            const updatedColumns = [...prev];
+            updatedColumns[Number(source.droppableId)] = sourceTasks;
+            updatedColumns[Number(destination.droppableId)] = destTasks;
+            return updatedColumns;
           });
         }
       }
@@ -113,34 +184,36 @@ function TaskBoardComp(board: boardProps) {
   };
 
   return (
-    <section className="ml-16 grid grid-cols-1 md:flex  py-8">
-      {bColumns.size ? (
-        <DragDropContext onDragEnd={handleOnDragEnd}>
-          {/*Board*/}
-          <Droppable droppableId="board" direction="horizontal" type="column">
-            {(provided) => (
-              <div
-                className="grid grid-cols-1 md:flex gap-5"
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-              >
-                {Array.from(bColumns.keys()).map((column, index) => {
-                  return (
-                    <BoardColumn
-                      key={column}
-                      column={bColumns.get(column)}
-                      index={index}
-                    />
-                  );
-                })}
-              
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-      ) : (
-        <></>
-      )}
+    <section className="ml-16 g flex flex-col md:flex-row  py-8 w-full mr-12 sm:mr-16 md:mr-0 relative">
+      <div className="w-full column-container my-10 md:my-0">
+        {bColumns ? (
+          <DragDropContext onDragEnd={handleOnDragEnd}>
+            {/*Board*/}
+            <Droppable droppableId="board" type="column" direction={direction}>
+              {(provided) => (
+                <div
+                  className="grid grid-cols-1 md:flex gap-5"
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                >
+                  {bColumns.map((column, index) => {
+                    return (
+                      <BoardColumn
+                        handleColumnDelete={handleColumnDelete}
+                        key={column.id}
+                        column={bColumns[index]}
+                        index={index}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        ) : (
+          <></>
+        )}
+      </div>
       <AddColumn callBack={addNewColumn} />
       <div className="px-5"></div>
     </section>

@@ -18,20 +18,26 @@ export type TTask = {
   description: string;
   assignedUsers: TUser[];
   assignedDate: Date;
-  completedDate: Date | null;
+  archivedDate: Date | null;
+  locationColumn: TColumn[];
+  locationDate: Date[];
 };
 
 export type TColumn = {
   id: string;
   title: string;
   tasks: TTask[];
+  createdDate: Date;
+  archived: boolean;
+  archivedDate: Date | null;
+  backLog: boolean;
 };
 
 export type TBoard = {
   id: string;
   ownerID: TUser;
   title: string;
-  columns: Map<string, TColumn>;
+  columns: TColumn[];
   adminUsers: TUser[];
   memberUsers: TUser[];
 };

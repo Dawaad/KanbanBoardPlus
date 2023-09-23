@@ -19,13 +19,25 @@ export const handleCreateColumn: RequestHandler = (
   const columnTitle = req.body.columnTitle;
   const boardID = req.body.boardID;
   const columnRef = collection(db, "columns");
+  const date = new Date();
   //Add New Column Entry and set Title
-  addDoc(columnRef, { title: columnTitle, tasks: [] }).then((docRef) => {
+
+  addDoc(columnRef, {
+    title: columnTitle,
+    tasks: [],
+    archived: false,
+    archivedDate: null,
+    createdDate: date,
+  }).then((docRef) => {
     const columnID = docRef.id;
     const insertedColumn: TColumn = {
       title: columnTitle,
       tasks: [],
       id: columnID,
+      archived: false,
+      archivedDate: null,
+      createdDate: date,
+      backLog: false,
     };
 
     //Retrieve Board Document
@@ -33,10 +45,7 @@ export const handleCreateColumn: RequestHandler = (
     getDoc(boardRef).then((boardSnap: DocumentSnapshot) => {
       if (boardSnap.exists()) {
         const board = boardSnap.data();
-        const updatedColumns = {
-          ...board.columns,
-          [columnID]: docRef,
-        };
+        const updatedColumns = [...board.columns, docRef];
 
         //Update Board Document with new column
         updateDoc(boardRef, { columns: updatedColumns })
@@ -88,6 +97,36 @@ export const handleDeleteColumnById: RequestHandler = (
     });
 };
 
+export const handleArchiveColumnById: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
+  const columnID = req.body.columnID;
+  const columnRef = doc(db, "columns", columnID);
+
+  getDoc(columnRef).then((columnSnap: DocumentSnapshot) => {
+    if (columnSnap.exists()) {
+      const columnData = columnSnap.data();
+      const archivedDate = new Date();
+
+      updateDoc(columnRef, {
+        ...columnData,
+        archived: true,
+        archivedDate: archivedDate,
+      })
+        .then(() => {
+          console.log("Document successfully updated!");
+          res.status(200).send("column-archive-success");
+        })
+        .catch((error) => {
+          console.error("Error updating document: ", error);
+        });
+    } else {
+      console.log("No such column!");
+    }
+  });
+};
+
 // update column by id
 export const handleUpdateColumnById: RequestHandler = (
   req: Request,
@@ -103,4 +142,30 @@ export const handleUpdateColumnById: RequestHandler = (
     .catch((error) => {
       console.error("Error updating document: ", error);
     });
+};
+
+export const handleUpdatedColumnSwap: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
+  const { boardID, sourceIndex, destIndex } = req.body;
+  const boardRef = doc(db, "boards", boardID);
+
+  getDoc(boardRef).then((boardSnap: DocumentSnapshot) => {
+    if (boardSnap.exists()) {
+      const board = boardSnap.data();
+      const columns = board.columns;
+      const [removed] = columns.splice(sourceIndex, 1);
+      columns.splice(destIndex, 0, removed);
+
+      updateDoc(boardRef, { columns: columns })
+        .then(() => {
+          console.log("Board Document Updated");
+          res.status(200).send(columns);
+        })
+        .catch((err) => {
+          res.status(500).send(err);
+        });
+    }
+  });
 };

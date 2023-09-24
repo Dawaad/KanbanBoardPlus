@@ -1,8 +1,10 @@
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import ColumnCard from "./Card";
-import { PlusCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
-import { TColumn, TTask } from "@/Types/FirebaseTypes";
-
+import { XCircleIcon } from "@heroicons/react/24/outline";
+import { TColumn, TTask, TUser } from "@/Types/FirebaseTypes";
+import AddTask from "../Modals/addTask";
+import { useState } from "react";
+import axios from "axios";
 type BoardProps = {
   column: TColumn | undefined;
   index: number;
@@ -11,7 +13,28 @@ type BoardProps = {
 
 function BoardColumn({ column, index, handleColumnDelete }: BoardProps) {
   if (!column) return null;
-  const { id, title, tasks, backLog } = column;
+  const { id, title, backLog } = column;
+  const [tasks, setTasks] = useState<TTask[]>(column.tasks);
+
+  const addTask = (title: string, description: string, date: Date) => {
+    axios
+      .post("http://localhost:3000/api/tasks/create", {
+        columnID: id,
+        taskTitle: title,
+        taskDescription: description,
+        taskDate: date,
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          console.log(res.data);
+          const newTask: TTask = res.data;
+          setTasks((prev) => {
+            return [...prev, newTask];
+          });
+        }
+      });
+  };
+
   return (
     <Draggable draggableId={id} index={index} isDragDisabled={column.backLog}>
       {(provided) => (
@@ -47,7 +70,11 @@ function BoardColumn({ column, index, handleColumnDelete }: BoardProps) {
                       handleColumnDelete(index);
                     }}
                   >
-                    <XCircleIcon className="h-8 w-8 text-red-500 hover:text-red-700" />
+                    <XCircleIcon
+                      className={`h-8 w-8 text-red-500 hover:text-red-700 ${
+                        backLog ? "hidden" : ""
+                      }`}
+                    />
                   </button>
                   <p className="ml-12">{title}</p>
                 </h2>
@@ -58,6 +85,9 @@ function BoardColumn({ column, index, handleColumnDelete }: BoardProps) {
                         key={`${id}-${task.id}`}
                         draggableId={`${id}-${task.id}`}
                         index={index}
+                        isDragDisabled={
+                          new Date(task.assignedDate) > new Date()
+                        }
                       >
                         {(provided) => (
                           <ColumnCard
@@ -73,9 +103,7 @@ function BoardColumn({ column, index, handleColumnDelete }: BoardProps) {
                   })}
                   {provided.placeholder}
                   <div className="flex items-end justify-end p-2">
-                    <button className="text-green-500 hover:text-green-700">
-                      <PlusCircleIcon className="h-10 w-10" />
-                    </button>
+                    <AddTask callBack={addTask} isBacklogColumn={backLog} />
                   </div>
                 </div>
               </div>

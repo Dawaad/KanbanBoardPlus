@@ -114,12 +114,15 @@ function TaskBoardComp(board: boardProps) {
     }
     //Rearrange Card Drag
     if (type === "card") {
-      // console.log(source.index, destination.index)
-
+      
       //Retrieve Column Keys
 
-      const sourceColumn = bColumns[Number(source.droppableId)];
-      const destColumn = bColumns[Number(destination.droppableId)];
+      const sourceColumn = bColumns.find((column) => {
+        return column.id == source.droppableId;
+      });
+      const destColumn = bColumns.find((column) => {
+        return column.id == destination.droppableId;
+      });
 
       if (!source || !destination) {
         return;
@@ -131,15 +134,16 @@ function TaskBoardComp(board: boardProps) {
       ) {
         return;
       }
+     
 
       //Same Column
-      if (sourceColumn === destColumn) {
+      if (sourceColumn?.id === destColumn?.id) {
         //Retrieve Tasks
 
         const col: TColumn | undefined = sourceColumn;
-
+       
         if (col) {
-          const tasks = Array.from(col?.tasks);
+          const tasks = col.tasks;
 
           const [removed] = tasks.splice(source.index, 1);
           tasks.splice(destination.index, 0, removed);
@@ -150,9 +154,14 @@ function TaskBoardComp(board: boardProps) {
           //Update the array of columns to reflect this new change in tasks
           setBColumns((prev) => {
             const updatedColumns = [...prev];
-            updatedColumns[Number(source.droppableId)] = newCol;
+            const index = updatedColumns.indexOf(col);
+            console.log(index);
+            updatedColumns[index] = newCol;
+
             return updatedColumns;
           });
+
+          
         }
       }
       //Different Column
@@ -161,8 +170,8 @@ function TaskBoardComp(board: boardProps) {
         const destCol: TColumn | undefined = destColumn;
 
         if (sourceCol && destCol) {
-          const sTasks = Array.from(sourceCol?.tasks);
-          const dTasks = Array.from(destCol?.tasks);
+          const sTasks = sourceCol.tasks;
+          const dTasks = destCol.tasks;
 
           const [removed] = sTasks.splice(source.index, 1);
           dTasks.splice(destination.index, 0, removed);

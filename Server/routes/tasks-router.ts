@@ -1,11 +1,17 @@
 import { Router } from "express";
-import { handleCreateTask, handleDeleteTaskById, handleGetTaskById, handleUpdateTaskById } from "../controllers/tasks-controllers";
+import {
+  handleCreateTask,
+  handleDeleteTaskById,
+  handleGetTaskById,
+  handleUpdateTaskById,
+  handleTaskSwap
+} from "../controllers/tasks-controllers";
 
 const tasksRouter = Router();
 
-tasksRouter.post("/tasks", handleCreateTask);
-tasksRouter.get("/tasks/:taskId", handleGetTaskById);
-tasksRouter.delete("/tasks/:taskId", handleDeleteTaskById);
-tasksRouter.put("/tasks/:taskId", handleUpdateTaskById);
-
+tasksRouter.post("/create", handleCreateTask);
+tasksRouter.get("/:taskId", handleGetTaskById);
+tasksRouter.delete("/:taskId", handleDeleteTaskById);
+tasksRouter.put("/:taskId", handleUpdateTaskById);
+tasksRouter.post("/swap", handleGetTaskById)
 export default tasksRouter;

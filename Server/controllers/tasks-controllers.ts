@@ -9,22 +9,69 @@ import {
   deleteDoc,
   updateDoc,
 } from "firebase/firestore";
+import { TTask, TUser } from "../types/types";
 
 // create task
-export const handleCreateTask: RequestHandler = (req: Request, res: Response) => {
-  const taskData = req.body.task;
+export const handleCreateTask: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
+  const columnID = req.body.columnID;
+  const taskTitle = req.body.taskTitle;
+  const taskDescription = req.body.taskDescription;
+  const assignedDate = req.body.taskDate;
+  const date = new Date();
+  const taskRef = collection(db, "tasks");
 
-  addDoc(collection(db, "tasks"), taskData)
-    .then(() => {
-      console.log("Document successfully written!");
-    })
-    .catch((error) => {
-      console.error("Error writing document: ", error);
+  const assignedUsers: TUser[] = [];
+
+  addDoc(taskRef, {
+    title: taskTitle,
+    description: taskDescription,
+    assignedUsers: assignedUsers,
+    assignedDate: assignedDate,
+    archivedDate: null,
+    locationColumn: [columnID],
+    locationDate: [date],
+  }).then((docRef) => {
+    const taskID = docRef.id;
+    const insertedTask = {
+      title: taskTitle,
+      description: taskDescription,
+      assignedUsers: assignedUsers,
+      assignedDate: assignedDate,
+      archivedDate: null,
+      locationColumn: [columnID],
+      locationDate: [date],
+      id: taskID,
+    };
+
+    //Retrieve Column Document
+    const columnRef = doc(db, "columns", columnID);
+    getDoc(columnRef).then((columnSnap: DocumentSnapshot) => {
+      if (columnSnap.exists()) {
+        const column = columnSnap.data();
+        const updatedTasks = [...column.tasks, docRef];
+
+        //Update Column Document with new task
+        updateDoc(columnRef, { tasks: updatedTasks })
+          .then(() => {
+            console.log("Column Document Updated");
+            res.status(200).send(insertedTask);
+          })
+          .catch((err) => {
+            res.status(500).send(err);
+          });
+      }
     });
+  });
 };
 
 // get task by id
-export const handleGetTaskById: RequestHandler = (req: Request, res: Response) => {
+export const handleGetTaskById: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
   const taskRef = doc(db, "tasks", req.params.taskId);
 
   getDoc(taskRef).then((taskSnap: DocumentSnapshot) => {
@@ -39,7 +86,10 @@ export const handleGetTaskById: RequestHandler = (req: Request, res: Response) =
 };
 
 // delete task by id
-export const handleDeleteTaskById: RequestHandler = (req: Request, res: Response) => {
+export const handleDeleteTaskById: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
   const taskRef = doc(db, "tasks", req.params.taskId);
 
   deleteDoc(taskRef)
@@ -52,7 +102,10 @@ export const handleDeleteTaskById: RequestHandler = (req: Request, res: Response
 };
 
 // update task by id
-export const handleUpdateTaskById: RequestHandler = (req: Request, res: Response) => {
+export const handleUpdateTaskById: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
   const taskRef = doc(db, "tasks", req.params.taskId);
   const taskChanges = req.body.task;
 
@@ -63,4 +116,39 @@ export const handleUpdateTaskById: RequestHandler = (req: Request, res: Response
     .catch((error) => {
       console.error("Error updating document: ", error);
     });
+};
+
+export const handleTaskSwap: RequestHandler = (req: Request, res: Response) => {
+  const columnID = req.body.columnID;
+  const taskId1 = req.body.taskId1;
+  const taskId2 = req.body.taskId2;
+  
+  const columnRef = doc(db, "columns", columnID);
+  getDoc(columnRef).then((columnSnap: DocumentSnapshot) => {
+    if (columnSnap.exists()) {
+      const columnData = columnSnap.data();
+      const tasks:string[] = columnData?.tasks;
+      if (tasks) {
+        const index1 =  tasks.findIndex(index => {return index === taskId1})
+        const index2 = tasks.findIndex(index => {return index === taskId2})
+        const task1 = tasks[index1];
+        const task2 = tasks[index2];
+        tasks[index1] = task2;
+        tasks[index2] = task1;
+        updateDoc(columnRef, {
+          tasks: tasks,
+        })
+          .then(() => {
+            console.log("Document successfully updated!");
+            res.status(200).send("task-swap-success");
+          })
+          .catch((error) => {
+            console.error("Error updating document: ", error);
+          });
+      }
+    } else {
+      console.log("No such column!");
+    }
+  });
+
 };

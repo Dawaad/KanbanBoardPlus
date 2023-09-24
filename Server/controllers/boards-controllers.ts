@@ -290,7 +290,7 @@ const getTasksFromRef = async (
         ).filter((user) => user !== null) as TUser[];
 
         const task: TTask = {
-          id: taskData.id,
+          id: taskDoc.id,
           title: taskData.title,
           description: taskData.description,
           assignedUsers: assignedUsers,

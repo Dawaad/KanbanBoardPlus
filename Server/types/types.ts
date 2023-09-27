@@ -1,3 +1,5 @@
+import { DocumentReference, Timestamp } from "firebase/firestore";
+
 export type TDashTile = {
   boardID: string;
   boardName: string;
@@ -18,8 +20,9 @@ export type TTask = {
   description: string;
   assignedUsers: TUser[];
   assignedDate: Date;
+
   archivedDate: Date | null;
-  locationColumn: TColumn[];
+  locationColumn: DocumentReference[];
   locationDate: Date[];
 };
 
@@ -33,6 +36,12 @@ export type TColumn = {
   backLog: boolean;
 };
 
+export type history = {
+  user: TUser;
+  date: Date;
+  action: string;
+};
+
 export type TBoard = {
   id: string;
   ownerID: TUser;
@@ -40,4 +49,12 @@ export type TBoard = {
   columns: TColumn[];
   adminUsers: TUser[];
   memberUsers: TUser[];
+  history: history[];
+  archived: TTask[];
+};
+
+export type boardFirestoreHistory = {
+  user: DocumentReference;
+  date: Timestamp;
+  action: string;
 };

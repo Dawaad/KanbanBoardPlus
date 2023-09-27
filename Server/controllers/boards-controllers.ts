@@ -1,6 +1,13 @@
 import { Request, RequestHandler, Response } from "express";
 import { db } from "../database/firebase";
-import { TBoard, TUser, TColumn, TTask } from "../types/types";
+import {
+  TBoard,
+  TUser,
+  TColumn,
+  TTask,
+  history,
+  boardFirestoreHistory,
+} from "../types/types";
 import { TDashTile } from "../types/types";
 import { isEmpty } from "lodash";
 import {
@@ -196,41 +203,21 @@ export const handleGetBoardById: RequestHandler = async (
 
     const columnsRef = boardData.columns as DocumentReference[];
     //If map is not empty, retrieve all columns
-
-    const columnsPromises: Promise<TColumn | null>[] = columnsRef.map(
-      async (columnRef: DocumentReference) => {
-        const columnDoc = await getDoc(columnRef);
-        if (columnDoc.exists()) {
-          const columnData = columnDoc.data();
-
-          if (columnData) {
-            const tasksRef = columnData.tasks as DocumentReference[];
-
-            const tasksPromises: Promise<TTask | null>[] =
-              await getTasksFromRef(tasksRef);
-            const tasks: TTask[] = (await Promise.all(tasksPromises)).filter(
-              (task) => task !== null
-            ) as TTask[];
-
-            const column: TColumn = {
-              id: columnDoc.id,
-              title: columnData.title,
-              tasks: tasks,
-              createdDate: columnData.createdDate,
-              archived: columnData.archived,
-              archivedDate: columnData.archivedDate,
-              backLog: columnData.backLog,
-            };
-
-            return column;
-          }
-        }
-        return null;
-      }
+    const columnsPromises: Promise<TColumn | null>[] = await getColumnsFromRef(
+      columnsRef
     );
+
     const columns: TColumn[] = (await Promise.all(columnsPromises)).filter(
       (column) => column !== null
     ) as TColumn[];
+
+    const history: history[] = await getHistoryFromData(boardData.history);
+    const archived: Promise<TTask | null>[] = await getTasksFromRef(
+      boardData.archived
+    );
+    const archivedTasks: TTask[] = (await Promise.all(archived)).filter(
+      (task) => task !== null
+    ) as TTask[];
 
     const board = {
       id: boardData.id,
@@ -239,6 +226,8 @@ export const handleGetBoardById: RequestHandler = async (
       columns: columns.filter((column) => column !== null) as TColumn[], //filter out null columns (if any)
       adminUsers: adminUsers,
       memberUsers: memberUsers,
+      history: history,
+      archived: archivedTasks,
     };
 
     res.send(board).status(200);
@@ -247,6 +236,171 @@ export const handleGetBoardById: RequestHandler = async (
   } catch (err) {
     res.send(err).status(404);
   }
+};
+
+export const handleGetUsersFromBoard = async (req: Request, res: Response) => {
+  const boardID = req.params.boardID;
+  const boardRef = doc(db, "boards", boardID);
+  getDoc(boardRef)
+    .then(async (boardSnap: DocumentSnapshot) => {
+      if (boardSnap.exists()) {
+        const board = boardSnap.data();
+        if (board) {
+          const adminUserRef = board.adminUsers as DocumentReference[];
+          const memberUserRef = board.memberUsers as DocumentReference[];
+
+          const adminUsers: Promise<TUser | null>[] =
+            await getBoardUsersFromRef(adminUserRef);
+          const memberUsers: Promise<TUser | null>[] =
+            await getBoardUsersFromRef(memberUserRef);
+
+          const users: TUser[] = (await Promise.all(adminUsers)).filter(
+            (user) => user !== null
+          ) as TUser[];
+          const member: TUser[] = (await Promise.all(memberUsers)).filter(
+            (user) => user !== null
+          ) as TUser[];
+
+          res.send(users.concat(member)).status(200);
+        }
+      }
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
+};
+
+export const handleGetHistoryFromBoard = async (
+  req: Request,
+  res: Response
+) => {
+  const boardID = req.params.boardID;
+  const boardRef = doc(db, "boards", boardID);
+
+  getDoc(boardRef)
+    .then(async (boardSnap: DocumentSnapshot) => {
+      if (boardSnap.exists()) {
+        const board = boardSnap.data();
+        if (board) {
+          const history = await getHistoryFromData(board.history);
+          res.send(history).status(200);
+        }
+      }
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
+};
+
+export const handleAddHistory = async (req: Request, res: Response) => {
+  const { boardID, userID, action } = req.body;
+  const boardRef = doc(db, "boards", boardID);
+  const userRef = doc(db, "users", userID);
+
+  const date = new Date();
+  getDoc(boardRef).then((boardSnap: DocumentSnapshot) => {
+    if (boardSnap.exists()) {
+      const board = boardSnap.data();
+      const history: boardFirestoreHistory[] = board?.history;
+      const newHistoryAddition = {
+        user: userRef,
+        date: date,
+        action: action,
+      };
+      updateDoc(boardRef, { history: [...history, newHistoryAddition] })
+        .then(() => {
+          res.status(200).send("History Added");
+        })
+        .catch((err) => {
+          res.status(500).send(err);
+        });
+    }
+  });
+};
+
+export const handleAddTaskToArchived = async (req: Request, res: Response) => {
+  const { taskID, boardID } = req.body;
+  const boardRef = doc(db, "boards", boardID);
+  const taskRef = doc(db, "tasks", taskID);
+  getDoc(boardRef).then((boardSnap: DocumentSnapshot) => {
+    if (boardSnap.exists()) {
+      const board = boardSnap.data();
+      const archived = board?.archived;
+
+      updateDoc(boardRef, { archived: [...archived, taskRef] })
+        .then(() => {
+          res.send("Task Archived").status(200);
+        })
+        .catch((err) => {
+          res.send(err).status(500);
+        });
+    }
+  });
+};
+
+/*Helper Functions */
+
+const getHistoryFromData = async (
+  firestoreHistory: boardFirestoreHistory[]
+): Promise<history[]> => {
+  const historyUserRef = firestoreHistory.map((history) => {
+    return history.user;
+  });
+
+  const userPromises: Promise<TUser | null>[] = await getBoardUsersFromRef(
+    historyUserRef
+  );
+  const historyUser: TUser[] = (await Promise.all(userPromises)).filter(
+    (user) => user !== null
+  ) as TUser[];
+  const history: history[] = firestoreHistory.map((history, index) => {
+    return {
+      user: historyUser[index],
+      date: history.date.toDate(),
+      action: history.action,
+    };
+  });
+
+  return history;
+};
+
+const getColumnsFromRef = async (
+  columnsRef: DocumentReference[]
+): Promise<Promise<TColumn | null>[]> => {
+  const columnsPromises: Promise<TColumn | null>[] = columnsRef.map(
+    async (columnRef: DocumentReference) => {
+      const columnDoc = await getDoc(columnRef);
+      if (columnDoc.exists()) {
+        const columnData = columnDoc.data();
+
+        if (columnData) {
+          const tasksRef = columnData.tasks as DocumentReference[];
+
+          const tasksPromises: Promise<TTask | null>[] = await getTasksFromRef(
+            tasksRef
+          );
+          const tasks: TTask[] = (await Promise.all(tasksPromises)).filter(
+            (task) => task !== null
+          ) as TTask[];
+
+          const column: TColumn = {
+            id: columnDoc.id,
+            title: columnData.title,
+            tasks: tasks,
+            createdDate: columnData.createdDate,
+            archived: columnData.archived,
+            archivedDate: columnData.archivedDate,
+            backLog: columnData.backLog,
+          };
+
+          return column;
+        }
+      }
+      return null;
+    }
+  );
+
+  return columnsPromises;
 };
 
 const getBoardUsersFromRef = async (

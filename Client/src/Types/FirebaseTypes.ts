@@ -1,3 +1,5 @@
+import { DocumentReference } from "@firebase/firestore-types";
+
 export type TDashTile = {
   boardID: string;
   boardName: string;
@@ -18,8 +20,9 @@ export type TTask = {
   description: string;
   assignedUsers: TUser[];
   assignedDate: Date;
+
   archivedDate: Date | null;
-  locationColumn: TColumn[];
+  locationColumn: DocumentReference[];
   locationDate: Date[];
 };
 
@@ -27,10 +30,16 @@ export type TColumn = {
   id: string;
   title: string;
   tasks: TTask[];
+  createdDate: Date;
   archived: boolean;
   archivedDate: Date | null;
-  backLog: boolean
-  createdDate: Date;
+  backLog: boolean;
+};
+
+export type history = {
+  user: TUser;
+  date: Date;
+  action: string;
 };
 
 export type TBoard = {
@@ -40,4 +49,6 @@ export type TBoard = {
   columns: TColumn[];
   adminUsers: TUser[];
   memberUsers: TUser[];
+  history: history[];
+  archived: TTask[];
 };

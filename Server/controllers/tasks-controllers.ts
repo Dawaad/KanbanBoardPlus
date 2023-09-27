@@ -8,8 +8,10 @@ import {
   DocumentSnapshot,
   deleteDoc,
   updateDoc,
+  DocumentReference,
 } from "firebase/firestore";
 import { TTask, TUser } from "../types/types";
+import { get } from "lodash";
 
 // create task
 export const handleCreateTask: RequestHandler = (
@@ -86,18 +88,20 @@ export const handleGetTaskById: RequestHandler = (
 };
 
 // delete task by id
-export const handleDeleteTaskById: RequestHandler = (
+export const handleArchiveTaskById: RequestHandler = (
   req: Request,
   res: Response
 ) => {
   const taskRef = doc(db, "tasks", req.params.taskId);
-
-  deleteDoc(taskRef)
+  const date = new Date();
+  //Update Archival Status in Task
+  updateDoc(taskRef, { archivedDate: date })
     .then(() => {
-      console.log("Document successfully deleted!");
+      console.log("Task Document Updated");
+      res.status(200).send("Task Updated");
     })
-    .catch((error) => {
-      console.error("Error removing document: ", error);
+    .catch((err) => {
+      res.status(500).send(err);
     });
 };
 
@@ -118,37 +122,89 @@ export const handleUpdateTaskById: RequestHandler = (
     });
 };
 
-export const handleTaskSwap: RequestHandler = (req: Request, res: Response) => {
-  const columnID = req.body.columnID;
-  const taskId1 = req.body.taskId1;
-  const taskId2 = req.body.taskId2;
-  
+export const handleSingleColumnTaskSwap: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
+  const { columnID, sourceIndex, destIndex } = req.body;
   const columnRef = doc(db, "columns", columnID);
   getDoc(columnRef).then((columnSnap: DocumentSnapshot) => {
     if (columnSnap.exists()) {
-      const columnData = columnSnap.data();
-      const tasks:string[] = columnData?.tasks;
-      if (tasks) {
-        const index1 =  tasks.findIndex(index => {return index === taskId1})
-        const index2 = tasks.findIndex(index => {return index === taskId2})
-        const task1 = tasks[index1];
-        const task2 = tasks[index2];
-        tasks[index1] = task2;
-        tasks[index2] = task1;
-        updateDoc(columnRef, {
-          tasks: tasks,
+      const column = columnSnap.data();
+      const tasks: DocumentReference[] = column?.tasks;
+      console.log(tasks.map((task) => task.id));
+      const [removed] = tasks.splice(sourceIndex, 1);
+      tasks.splice(destIndex, 0, removed);
+      console.log(tasks.map((task) => task.id));
+      updateDoc(columnRef, { tasks: tasks })
+        .then(() => {
+          console.log("Column Document Updated");
+          res.status(200).send("Column Updated");
         })
-          .then(() => {
-            console.log("Document successfully updated!");
-            res.status(200).send("task-swap-success");
-          })
-          .catch((error) => {
-            console.error("Error updating document: ", error);
-          });
-      }
-    } else {
-      console.log("No such column!");
+        .catch((err) => {
+          res.status(500).send(err);
+        });
     }
   });
+};
 
+export const handleSwapTaskMultiColumn: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  const { sourceColumnID, destColumnID, sourceIndex, destIndex } = req.body;
+  const sourceColumnRef = doc(db, "columns", sourceColumnID);
+  const destColumnRef = doc(db, "columns", destColumnID);
+
+  const sourceColumnSnap = await getDoc(sourceColumnRef);
+  const destColumnSnap = await getDoc(destColumnRef);
+
+  if (sourceColumnSnap.exists() && destColumnSnap.exists()) {
+    const sourceTask: DocumentReference[] = sourceColumnSnap.data().tasks;
+    const destTask: DocumentReference[] = destColumnSnap.data().tasks;
+    const [removed] = sourceTask.splice(sourceIndex, 1);
+    destTask.splice(destIndex, 0, removed);
+    await updateDoc(sourceColumnRef, { tasks: sourceTask });
+    await updateDoc(destColumnRef, { tasks: destTask });
+
+    //Update Column Location History in Task Document
+    const taskRef = doc(db, "tasks", removed.id);
+    const taskSnap = await getDoc(taskRef);
+    if (taskSnap.exists()) {
+      const task = taskSnap.data();
+      const locationColumn = task?.locationColumn;
+      const locationDate = task?.locationDate;
+      locationColumn.push(destColumnID);
+      locationDate.push(new Date());
+      await updateDoc(taskRef, {
+        locationColumn: locationColumn,
+        locationDate: locationDate,
+      });
+      console.log("Column Document Updated");
+      res.status(200).send("Column Updated");
+    }
+  }
+};
+
+export const handleAddUserToTask = async (req: Request, res: Response) => {
+  const userID: string = req.body.userID;
+  const taskID: string = req.body.taskID;
+  const taskRef = doc(db, "tasks", taskID);
+  const userRef = doc(db, "users", userID);
+
+  getDoc(taskRef).then((taskSnap: DocumentSnapshot) => {
+    if (taskSnap.exists()) {
+      const task = taskSnap.data();
+      const assignedUsers: DocumentReference[] = task?.assignedUsers;
+      if (!assignedUsers.find((user) => user.id === userID)) {
+        updateDoc(taskRef, { assignedUsers: [...assignedUsers, userRef] })
+          .then(() => {
+            res.status(200);
+          })
+          .catch((err) => {
+            res.status(500).send(err);
+          });
+      }
+    }
+  });
 };

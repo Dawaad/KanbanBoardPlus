@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-
+import { User, getAuth, onAuthStateChanged } from "firebase/auth";
 import { DragDropContext, DropResult, Droppable } from "react-beautiful-dnd";
 import { useParams } from "react-router-dom";
 import BoardColumn from "./BoardColumn";
@@ -17,10 +17,27 @@ function TaskBoardComp(board: boardProps) {
       return !column.archived;
     })
   );
+  const [user, setUser] = useState<User | undefined>();
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      setUser(user);
+    } else {
+      setUser(undefined);
+    }
+  });
 
   const [direction, setDirection] = useState<"vertical" | "horizontal">(
     "vertical"
   );
+
+  const handleAddHistory = async (action: string) => {
+    axios.post("http://localhost:3000/api/boards/history", {
+      boardID: board.board.id,
+      userID: user?.uid,
+      action: action,
+    });
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -59,6 +76,8 @@ function TaskBoardComp(board: boardProps) {
           setBColumns((prev) => {
             return [...prev, newColumn];
           });
+          //Add to history
+          handleAddHistory(`Added Column ${title}`);
         }
       });
   };
@@ -68,19 +87,24 @@ function TaskBoardComp(board: boardProps) {
     const date = new Date();
 
     if (!bColumns[columnIndex].backLog) {
-      setBColumns((prev) => {
-        const allColumns = [...prev];
-        allColumns[columnIndex].archived = true;
-        allColumns[columnIndex].archivedDate = date;
-        return allColumns.filter((column) => {
-          return !column.archived;
-        });
-      });
-
       //Remove from Firebase
       axios.put("http://localhost:3000/api/columns/archive", {
         columnID: bColumns[columnIndex].id,
       });
+
+      //Add to history
+      handleAddHistory(`Archived Column ${bColumns[columnIndex].title}`).then(
+        () => {
+          setBColumns((prev) => {
+            const allColumns = [...prev];
+            allColumns[columnIndex].archived = true;
+            allColumns[columnIndex].archivedDate = date;
+            return allColumns.filter((column) => {
+              return !column.archived;
+            });
+          });
+        }
+      );
     }
   };
 
@@ -90,31 +114,29 @@ function TaskBoardComp(board: boardProps) {
     if (!destination) return;
     //Rearrange Column Drag
     if (type === "column") {
-      // const entries = Array.from(bColumns.entries());
-      // const [removed] = entries.splice(source.index, 1);
-      // entries.splice(destination.index, 0, removed);
-      // setBColumns(new Map(entries));
       if (source.index === destination.index) return;
 
       //Do not allow user to swap the Backlog column
 
       if (bColumns[source.index].backLog || bColumns[destination.index].backLog)
         return;
-
-      const entries = bColumns;
-      const [removed] = entries.splice(source.index, 1);
-      entries.splice(destination.index, 0, removed);
-      setBColumns(entries);
-      //Console log the index of the swap
-      axios.post("http://localhost:3000/api/columns/swap", {
-        boardID: board.board.id,
-        sourceIndex: source.index,
-        destIndex: destination.index,
+      handleAddHistory(
+        `Swapped position of ${bColumns[source.index].title}`
+      ).then(() => {
+        const entries = bColumns;
+        const [removed] = entries.splice(source.index, 1);
+        entries.splice(destination.index, 0, removed);
+        setBColumns(entries);
+        //Console log the index of the swap
+        axios.post("http://localhost:3000/api/columns/swap", {
+          boardID: board.board.id,
+          sourceIndex: source.index,
+          destIndex: destination.index,
+        });
       });
     }
     //Rearrange Card Drag
     if (type === "card") {
-      
       //Retrieve Column Keys
 
       const sourceColumn = bColumns.find((column) => {
@@ -134,14 +156,13 @@ function TaskBoardComp(board: boardProps) {
       ) {
         return;
       }
-     
 
       //Same Column
       if (sourceColumn?.id === destColumn?.id) {
         //Retrieve Tasks
 
         const col: TColumn | undefined = sourceColumn;
-       
+
         if (col) {
           const tasks = col.tasks;
 
@@ -151,17 +172,29 @@ function TaskBoardComp(board: boardProps) {
           //Reassign the new tasks to the column
           const newCol: TColumn = { ...col, tasks: tasks };
 
-          //Update the array of columns to reflect this new change in tasks
-          setBColumns((prev) => {
-            const updatedColumns = [...prev];
-            const index = updatedColumns.indexOf(col);
-            console.log(index);
-            updatedColumns[index] = newCol;
+          handleAddHistory(`Swapped position of ${col.title}`).then(() => {
+            //Update the array of columns to reflect this new change in tasks
 
-            return updatedColumns;
+            setBColumns((prev) => {
+              const updatedColumns = [...prev];
+              const index = updatedColumns.indexOf(col);
+
+              updatedColumns[index] = newCol;
+
+              return updatedColumns;
+            });
+
+            //Update Firebase
+            axios
+              .post("http://localhost:3000/api/tasks/swap/single", {
+                columnID: col.id,
+                sourceIndex: source.index,
+                destIndex: destination.index,
+              })
+              .catch((err) => {
+                console.log(err);
+              });
           });
-
-          
         }
       }
       //Different Column
@@ -179,14 +212,24 @@ function TaskBoardComp(board: boardProps) {
           //Refactor New Columns
           const sourceTasks: TColumn = { ...sourceCol, tasks: sTasks };
           const destTasks: TColumn = { ...destCol, tasks: dTasks };
+          handleAddHistory(`Moved Task ${removed.title} to Column ${destCol.title}`).then(
+            () => {
+              //Update the array of columns to reflect this new change in tasks
+              setBColumns((prev) => {
+                const updatedColumns = [...prev];
+                updatedColumns[Number(source.droppableId)] = sourceTasks;
+                updatedColumns[Number(destination.droppableId)] = destTasks;
+                return updatedColumns;
+              });
 
-          //Update the array of columns to reflect this new change in tasks
-          setBColumns((prev) => {
-            const updatedColumns = [...prev];
-            updatedColumns[Number(source.droppableId)] = sourceTasks;
-            updatedColumns[Number(destination.droppableId)] = destTasks;
-            return updatedColumns;
-          });
+              axios.post("http://localhost:3000/api/tasks/swap/multiple", {
+                sourceColumnID: sourceCol.id,
+                destColumnID: destCol.id,
+                sourceIndex: source.index,
+                destIndex: destination.index,
+              });
+            }
+          );
         }
       }
     }
@@ -208,6 +251,7 @@ function TaskBoardComp(board: boardProps) {
                   {bColumns.map((column, index) => {
                     return (
                       <BoardColumn
+                        boardID={board.board.id}
                         handleColumnDelete={handleColumnDelete}
                         key={column.id}
                         column={bColumns[index]}

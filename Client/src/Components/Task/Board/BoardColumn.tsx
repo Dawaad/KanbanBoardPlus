@@ -2,19 +2,70 @@ import { Draggable, Droppable } from "react-beautiful-dnd";
 import ColumnCard from "./Card";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import { TColumn, TTask, TUser } from "@/Types/FirebaseTypes";
-import AddTask from "../Modals/addTask";
+import AddTask from "../Modals/AddTask";
 import { useState } from "react";
+import { User, getAuth, onAuthStateChanged } from "firebase/auth";
 import axios from "axios";
 type BoardProps = {
   column: TColumn | undefined;
+  boardID: string;
   index: number;
   handleColumnDelete: (columnIndex: number) => void;
 };
 
-function BoardColumn({ column, index, handleColumnDelete }: BoardProps) {
+function BoardColumn({
+  column,
+  index,
+  handleColumnDelete,
+  boardID,
+}: BoardProps) {
   if (!column) return null;
   const { id, title, backLog } = column;
-  const [tasks, setTasks] = useState<TTask[]>(column.tasks);
+  const [tasks, setTasks] = useState<TTask[]>(
+    column.tasks.filter((task) => {
+      return !task.archivedDate;
+    })
+  );
+  const [user, setUser] = useState<User | undefined>();
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      setUser(user);
+    } else {
+      setUser(undefined);
+    }
+  });
+
+  const removeTask = (taskID: string) => {
+    //Remove from Local State
+    //Remove from Database
+    axios
+      .put(`http://localhost:3000/api/tasks/archive/${id}/${taskID}`)
+      .then(() => {
+        setTasks((prev) => {
+          return prev.filter((task) => {
+            return !task.archivedDate && task.id !== taskID;
+          });
+        });
+        //Add Task to Boards Archived Tasks
+        axios
+          .post("http://localhost:3000/api/boards/archive", {
+            boardID: boardID,
+            taskID: taskID,
+          })
+          .then(() => {
+            //Add to history
+            axios.post("http://localhost:3000/api/boards/history", {
+              boardID: boardID,
+              userID: user?.uid,
+              action: `Removed Task ${title} from ${column.title}`,
+            });
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      });
+  };
 
   const addTask = (title: string, description: string, date: Date) => {
     axios
@@ -30,6 +81,12 @@ function BoardColumn({ column, index, handleColumnDelete }: BoardProps) {
           const newTask: TTask = res.data;
           setTasks((prev) => {
             return [...prev, newTask];
+          });
+          //Add to history
+          axios.post("http://localhost:3000/api/boards/history", {
+            boardID: boardID,
+            userID: user?.uid,
+            action: `Added Task ${title} to ${column.title}`,
           });
         }
       });
@@ -91,6 +148,8 @@ function BoardColumn({ column, index, handleColumnDelete }: BoardProps) {
                       >
                         {(provided) => (
                           <ColumnCard
+                            deleteTaskCallback={removeTask}
+                            boardID={boardID}
                             task={task}
                             index={index}
                             innerRef={provided.innerRef}

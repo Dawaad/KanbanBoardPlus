@@ -37,6 +37,7 @@ function useBoard(boardID: string | undefined) {
               columns: data.columns,
               adminUsers: data.adminUsers,
               memberUsers: data.memberUsers,
+              history: data.history,
             };
 
             //Check if user is in board

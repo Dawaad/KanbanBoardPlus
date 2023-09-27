@@ -1,4 +1,4 @@
-import { AlertDialog, AlertDialogTrigger } from "@/Components/ui/alert-dialog";
+import { Dialog, DialogTrigger } from "@/Components/ui/dialog";
 import { cn } from "@/lib/utils";
 import React from "react";
 import { Link } from "react-router-dom";
@@ -20,8 +20,9 @@ type Props = React.HtmlHTMLAttributes<HTMLDivElement> & {
 function SidebarSection({ className, iconDetails, ...props }: Props) {
   return (
     <>
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
+      <Dialog 
+       >
+        <DialogTrigger asChild>
           <div
             className={cn(
               "flex items-center overflow-hidden hover:bg-zinc-400/30 hover:dark:bg-zinc-500/30 cursor-pointer",
@@ -34,9 +35,9 @@ function SidebarSection({ className, iconDetails, ...props }: Props) {
               {iconDetails.title}
             </div>
           </div>
-        </AlertDialogTrigger>
+        </DialogTrigger>
         {iconDetails.modal}
-      </AlertDialog>
+      </Dialog>
     </>
   );
 }

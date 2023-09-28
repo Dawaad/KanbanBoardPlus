@@ -7,6 +7,8 @@ import {
   TTask,
   history,
   boardFirestoreHistory,
+  userContribution,
+  memberOverview,
 } from "../types/types";
 import { TDashTile } from "../types/types";
 import { isEmpty } from "lodash";
@@ -22,6 +24,7 @@ import {
   documentId,
   getDocs,
   DocumentReference,
+  Timestamp,
 } from "firebase/firestore";
 
 // Get all boards for a user by userID
@@ -227,7 +230,7 @@ export const handleGetBoardById: RequestHandler = async (
       adminUsers: adminUsers,
       memberUsers: memberUsers,
       history: history,
-      archived: archivedTasks,
+      // archived: archivedTasks,
     };
 
     res.send(board).status(200);
@@ -292,6 +295,34 @@ export const handleGetHistoryFromBoard = async (
     });
 };
 
+export const handleGetArchivedTaskFromBoard = async (
+  req: Request,
+  res: Response
+) => {
+  const boardID = req.params.boardID;
+  const boardRef = doc(db, "boards", boardID);
+  getDoc(boardRef)
+    .then(async (boardSnap: DocumentSnapshot) => {
+      if (boardSnap.exists()) {
+        const board = boardSnap.data();
+        if (board) {
+          const archived = board.archived;
+          const archivedTasks: Promise<TTask | null>[] = await getTasksFromRef(
+            archived
+          );
+          const tasks: TTask[] = (await Promise.all(archivedTasks)).filter(
+            (task) => task !== null
+          ) as TTask[];
+          res.send(tasks).status(200);
+        }
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      res.send(err).status(500);
+    });
+};
+
 export const handleAddHistory = async (req: Request, res: Response) => {
   const { boardID, userID, action } = req.body;
   const boardRef = doc(db, "boards", boardID);
@@ -336,6 +367,69 @@ export const handleAddTaskToArchived = async (req: Request, res: Response) => {
         });
     }
   });
+};
+
+export const handleGetUserContribution = async (
+  req: Request,
+  res: Response
+) => {
+  const boardID = req.params.boardID;
+  const boardRef = doc(db, "boards", boardID);
+  getDoc(boardRef)
+    .then(async (boardSnap: DocumentSnapshot) => {
+      if (boardSnap.exists()) {
+        const board = boardSnap.data();
+        //Retrieve all users from board
+        const adminUsersRef: DocumentReference[] = board?.adminUsers;
+        const memberUsersRef: DocumentReference[] = board?.memberUsers;
+        const allUsersRef = adminUsersRef.concat(memberUsersRef);
+        const allUsersPromises: Promise<TUser | null>[] =
+          await getBoardUsersFromRef(allUsersRef);
+        const allUsers: TUser[] = (await Promise.all(allUsersPromises)).filter(
+          (user) => user !== null
+        ) as TUser[];
+
+        const promiseColumns = await getColumnsFromRef(board?.columns);
+        //Retrieve all tasks from columns
+        const columns = (await Promise.all(promiseColumns)).filter(
+          (column) => column !== null
+        ) as TColumn[];
+        //Get the total number of active tasks
+        const taskLengthPerColumn = columns.map((column) => {
+          return column.tasks.filter((task) => {
+            return !task.archivedDate;
+          }).length;
+        });
+        const totalSum = taskLengthPerColumn.reduce((a, b) => a + b, 0);
+        //Get the number of tasks per user
+        const userCont: userContribution[] = allUsers.map((user) => {
+          const userTasks = columns.map((column) => {
+            return column.tasks.filter((task) => {
+              return (
+                !task.archivedDate &&
+                task.assignedUsers.find((assignedUser) => {
+                  return assignedUser.uid === user.uid;
+                })
+              );
+            }).length;
+          });
+          const userTaskSum = userTasks.reduce((a, b) => a + b, 0);
+          return {
+            user: user,
+            tasksAllocated: userTaskSum,
+          };
+        });
+        const memberContribution: memberOverview = {
+          totalTasks: totalSum,
+          userContribution: userCont,
+        };
+        
+        res.send(memberContribution).status(200);
+      }
+    })
+    .catch((err) => {
+      res.send(err).status(500);
+    });
 };
 
 /*Helper Functions */
@@ -443,13 +537,15 @@ const getTasksFromRef = async (
           await Promise.all(assignedUsersPromises)
         ).filter((user) => user !== null) as TUser[];
 
+        const archivedDate: Timestamp | null = taskData.archivedDate;
+
         const task: TTask = {
           id: taskDoc.id,
           title: taskData.title,
           description: taskData.description,
           assignedUsers: assignedUsers,
           assignedDate: taskData.assignedDate,
-          archivedDate: taskData.archivedDate,
+          archivedDate: archivedDate ? archivedDate.toDate() : null,
           locationColumn: taskData.locationColumn,
           locationDate: taskData.locationDate,
         };

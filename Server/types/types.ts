@@ -58,3 +58,13 @@ export type boardFirestoreHistory = {
   date: Timestamp;
   action: string;
 };
+
+export type userContribution = {
+  user: TUser;
+  tasksAllocated: number;
+};
+
+export type memberOverview = {
+  totalTasks: number;
+  userContribution: userContribution[];
+};

@@ -12,6 +12,7 @@ import {
   query,
   where,
   getDocs,
+  DocumentReference,
 } from "firebase/firestore";
 import { get } from "http";
 
@@ -102,17 +103,27 @@ export const handleJoinBoardWithInviteCode: RequestHandler = (req, res) => {
             getDoc(boardRef).then((boardSnap) => {
               if (boardSnap.exists()) {
                 const boardData = boardSnap.data();
-                const boardMembers = boardData?.members || [];
-
-                if (boardMembers.includes(userID)) {
+                const boardMembers: DocumentReference[] = boardData?.memberUsers;
+                if (
+                  boardMembers
+                    .map((member) => {
+                      return member.id;
+                    })
+                    .includes(userID)
+                ) {
                   res.status(200).send("user-in-board");
                   return;
                 }
+                // if (boardMembers.includes(userID)) {
+                //   res.status(200).send("user-in-board");
+                //   return;
+                // }
 
-                boardMembers.push(userID);
+                const userRef = doc(db, "users", userID);
+                boardMembers.push(userRef);
 
                 updateDoc(boardRef, {
-                  members: boardMembers,
+                  memberUsers: boardMembers,
                 }).then(() => {
                   //   // Delete the invite code
                   //   deleteDoc(doc(db, "inviteCodes", boardID))
@@ -123,7 +134,7 @@ export const handleJoinBoardWithInviteCode: RequestHandler = (req, res) => {
                   //       console.error("Error deleting invite code:", error);
                   //       res.status(500).send("Internal server error");
                   //     });
-                  res.status(200).send("User added to board");
+                  res.status(200).send(boardID);
                 });
               } else {
                 res.status(404).send("Board not found");

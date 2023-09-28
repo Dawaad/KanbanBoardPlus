@@ -44,7 +44,7 @@ function ColumnCard({
   innerRef,
   dragHandleProps,
   draggableProps,
-  deleteTaskCallback
+  deleteTaskCallback,
 }: CardProps) {
   const { title, description } = task;
   const isFuture = task.assignedDate
@@ -77,12 +77,18 @@ function ColumnCard({
               <EllipsisHorizontalCircleIcon className="w-8 h-8 text-zinc-600 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200" />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-white/90 dark:bg-zinc-800">
-              <ViewTaskDialogue title="Overview" modal={<TaskOverview task={task}/>} />
+              <ViewTaskDialogue
+                title="Overview"
+                modal={<TaskOverview task={task} />}
+              />
 
-              <ViewTaskAlert title="Add User" modal={<TaskUsers task={task} boardID={boardID}/>} />
+              <ViewTaskAlert
+                title="Add User"
+                modal={<TaskUsers task={task} boardID={boardID} />}
+              />
               <ViewTaskAlert
                 className="text-red-400"
-                title="Delete"
+                title="Archive"
                 modal={<TaskDelete task={task} onDelete={deleteTaskCallback} />}
               />
             </DropdownMenuContent>

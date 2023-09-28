@@ -3,9 +3,10 @@ import ColumnCard from "./Card";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import { TColumn, TTask, TUser } from "@/Types/FirebaseTypes";
 import AddTask from "../Modals/AddTask";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { User, getAuth, onAuthStateChanged } from "firebase/auth";
 import axios from "axios";
+import { set } from "date-fns";
 type BoardProps = {
   column: TColumn | undefined;
   boardID: string;
@@ -21,11 +22,13 @@ function BoardColumn({
 }: BoardProps) {
   if (!column) return null;
   const { id, title, backLog } = column;
-  const [tasks, setTasks] = useState<TTask[]>(
-    column.tasks.filter((task) => {
-      return !task.archivedDate;
-    })
-  );
+
+  const [columnTasks, setTasks] = useState<TTask[]>([]);
+
+  useEffect(() => {
+    setTasks(column.tasks);
+  }, [column]);
+
   const [user, setUser] = useState<User | undefined>();
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
@@ -42,11 +45,18 @@ function BoardColumn({
     axios
       .put(`http://localhost:3000/api/tasks/archive/${id}/${taskID}`)
       .then(() => {
-        setTasks((prev) => {
-          return prev.filter((task) => {
-            return !task.archivedDate && task.id !== taskID;
-          });
+        //Update Tasks Archived Date
+        const date = new Date();
+        const taskIndex = columnTasks.findIndex((task) => {
+          return task.id == taskID;
         });
+        const task = columnTasks[taskIndex];
+        task.archivedDate = date;
+        const newTasks = [...columnTasks];
+
+        newTasks[taskIndex] = task;
+        setTasks(newTasks);
+
         //Add Task to Boards Archived Tasks
         axios
           .post("http://localhost:3000/api/boards/archive", {
@@ -77,7 +87,6 @@ function BoardColumn({
       })
       .then((res) => {
         if (res.status === 200) {
-          console.log(res.data);
           const newTask: TTask = res.data;
           setTasks((prev) => {
             return [...prev, newTask];
@@ -136,30 +145,34 @@ function BoardColumn({
                   <p className="ml-12">{title}</p>
                 </h2>
                 <div className="space-y-2">
-                  {tasks.map((task, index) => {
-                    return (
-                      <Draggable
-                        key={`${id}-${task.id}`}
-                        draggableId={`${id}-${task.id}`}
-                        index={index}
-                        isDragDisabled={
-                          new Date(task.assignedDate) > new Date()
-                        }
-                      >
-                        {(provided) => (
-                          <ColumnCard
-                            deleteTaskCallback={removeTask}
-                            boardID={boardID}
-                            task={task}
-                            index={index}
-                            innerRef={provided.innerRef}
-                            dragHandleProps={provided.dragHandleProps}
-                            draggableProps={provided.draggableProps}
-                          />
-                        )}
-                      </Draggable>
-                    );
-                  })}
+                  {columnTasks
+                    .filter((task) => {
+                      return !task.archivedDate;
+                    })
+                    .map((task, index) => {
+                      return (
+                        <Draggable
+                          key={`${id}-${task.id}`}
+                          draggableId={`${id}-${task.id}`}
+                          index={index}
+                          isDragDisabled={
+                            new Date(task.assignedDate) > new Date()
+                          }
+                        >
+                          {(provided) => (
+                            <ColumnCard
+                              deleteTaskCallback={removeTask}
+                              boardID={boardID}
+                              task={task}
+                              index={index}
+                              innerRef={provided.innerRef}
+                              dragHandleProps={provided.dragHandleProps}
+                              draggableProps={provided.draggableProps}
+                            />
+                          )}
+                        </Draggable>
+                      );
+                    })}
                   {provided.placeholder}
                   <div className="flex items-end justify-end p-2">
                     <AddTask callBack={addTask} isBacklogColumn={backLog} />

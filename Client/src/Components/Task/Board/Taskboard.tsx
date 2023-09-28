@@ -165,7 +165,7 @@ function TaskBoardComp(board: boardProps) {
 
         if (col) {
           const tasks = col.tasks;
-
+        
           const [removed] = tasks.splice(source.index, 1);
           tasks.splice(destination.index, 0, removed);
 
@@ -177,12 +177,15 @@ function TaskBoardComp(board: boardProps) {
 
             setBColumns((prev) => {
               const updatedColumns = [...prev];
+
               const index = updatedColumns.indexOf(col);
 
               updatedColumns[index] = newCol;
-
+             
               return updatedColumns;
             });
+
+           
 
             //Update Firebase
             axios
@@ -212,24 +215,24 @@ function TaskBoardComp(board: boardProps) {
           //Refactor New Columns
           const sourceTasks: TColumn = { ...sourceCol, tasks: sTasks };
           const destTasks: TColumn = { ...destCol, tasks: dTasks };
-          handleAddHistory(`Moved Task ${removed.title} to Column ${destCol.title}`).then(
-            () => {
-              //Update the array of columns to reflect this new change in tasks
-              setBColumns((prev) => {
-                const updatedColumns = [...prev];
-                updatedColumns[Number(source.droppableId)] = sourceTasks;
-                updatedColumns[Number(destination.droppableId)] = destTasks;
-                return updatedColumns;
-              });
+          handleAddHistory(
+            `Moved Task ${removed.title} to Column ${destCol.title}`
+          ).then(() => {
+            //Update the array of columns to reflect this new change in tasks
+            setBColumns((prev) => {
+              const updatedColumns = [...prev];
+              updatedColumns[Number(source.droppableId)] = sourceTasks;
+              updatedColumns[Number(destination.droppableId)] = destTasks;
+              return updatedColumns;
+            });
 
-              axios.post("http://localhost:3000/api/tasks/swap/multiple", {
-                sourceColumnID: sourceCol.id,
-                destColumnID: destCol.id,
-                sourceIndex: source.index,
-                destIndex: destination.index,
-              });
-            }
-          );
+            axios.post("http://localhost:3000/api/tasks/swap/multiple", {
+              sourceColumnID: sourceCol.id,
+              destColumnID: destCol.id,
+              sourceIndex: source.index,
+              destIndex: destination.index,
+            });
+          });
         }
       }
     }

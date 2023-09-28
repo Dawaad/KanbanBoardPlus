@@ -113,7 +113,7 @@ function Login() {
           const firebaseUser: TUser = {
             uid: user.uid,
             email: user.email ? user.email : "",
-            displayName: user.displayName ? user.displayName : "New User",
+            displayName: signUpData.name,
             photoURL: user.photoURL ? user.photoURL : "",
             assignedBoards: [],
           };
@@ -178,9 +178,7 @@ function Login() {
             </div>
             <form
               onSubmit={(e) => {
-                if (signUpDetailValidation(e)) {
-                  emailSignUp();
-                }
+                emailSignUp();
               }}
             >
               <div className=" p-4 flex w-full items-center">

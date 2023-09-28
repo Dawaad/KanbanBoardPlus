@@ -52,3 +52,13 @@ export type TBoard = {
   history: history[];
   archived: TTask[];
 };
+
+export type userContribution = {
+  user: TUser;
+  tasksAllocated: number;
+};
+
+export type memberOverview = {
+  totalTasks: number;
+  userContribution: userContribution[];
+};

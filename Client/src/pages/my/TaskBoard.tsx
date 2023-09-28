@@ -13,7 +13,7 @@ function TaskBoard() {
   if (!boardID) {
     navigate("/dashboard");
   }
-
+  console.log(boardID)
   const userBoard = useBoard(boardID);
 
   const { board, userAccess, loading, error } = userBoard;

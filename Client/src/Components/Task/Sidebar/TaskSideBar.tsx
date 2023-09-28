@@ -18,6 +18,7 @@ import { User, getAuth, onAuthStateChanged } from "firebase/auth";
 import { UserGroupIcon } from "@heroicons/react/24/outline";
 import BoardMembers from "../Modals/Sidebar/BoardMembers";
 import History from "../Modals/Sidebar/History";
+import ArchivedTask from "../Modals/Sidebar/ArchivedTask";
 
 // Array of different colours in hex notation
 const colourHex = [
@@ -107,7 +108,7 @@ function TaskSideBar(board: boardProps) {
             ),
             title: "Members",
             onClick: () => {},
-            modal: <BoardMembers/>,
+            modal: <BoardMembers boardID={board.board.id} />,
           }}
         />
       </section>
@@ -125,7 +126,7 @@ function TaskSideBar(board: boardProps) {
             onClick: () => {
               console.log("View History Clicked");
             },
-          modal: <History boardID={board.board.id}/>
+            modal: <History boardID={board.board.id} />,
           }}
         />
         <SidebarSegment
@@ -133,7 +134,7 @@ function TaskSideBar(board: boardProps) {
             icon: (
               <PresentationChartLineIcon className="w-7 h-6 text-zinc-800/90 dark:text-zinc-300" />
             ),
-            title: "Activity",
+            title: "View Previous States",
             onClick: () => {
               console.log("Activity Clicked");
             },
@@ -148,6 +149,7 @@ function TaskSideBar(board: boardProps) {
             onClick: () => {
               console.log("Archived Tasks Clicked");
             },
+            modal: <ArchivedTask boardID={board.board.id} />,
           }}
         />
       </section>

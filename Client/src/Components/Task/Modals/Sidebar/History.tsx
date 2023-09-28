@@ -1,10 +1,11 @@
-import { DialogContent } from "@/Components/ui/dialog";
+import { DialogContent, DialogTitle } from "@/Components/ui/dialog";
 import React from "react";
 import { history } from "@/Types/FirebaseTypes";
 import { ColumnDef } from "@tanstack/react-table";
 import { Skeleton } from "@/Components/ui/skeleton";
 import useHistory from "@/Hooks/useHistory";
 import { DataTable } from "@/Components/ui/data-table";
+
 export type tableHistory = {
   date: string;
   action: string;
@@ -44,6 +45,7 @@ function History(boardID: HistoryProps) {
 
   return (
     <DialogContent  className="py-10">
+      <DialogTitle className="text-xl font-bold">Board History</DialogTitle>
       <DataTable columns={columns} data={parsedHistory} />
     </DialogContent>
   );

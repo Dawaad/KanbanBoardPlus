@@ -36,7 +36,7 @@ function JoinInvite(userID: InviteProps) {
           if (res.data === "user-in-board") {
             setError(true);
           } else {
-            navigate(`/board/${res.data}`);
+            navigate(`board/${res.data}`);
           }
         }
       });

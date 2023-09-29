@@ -20,7 +20,6 @@ export type TTask = {
   description: string;
   assignedUsers: TUser[];
   assignedDate: Date;
-
   archivedDate: Date | null;
   locationColumn: DocumentReference[];
   locationDate: Date[];

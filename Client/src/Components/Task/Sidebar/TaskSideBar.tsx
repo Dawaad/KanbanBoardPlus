@@ -19,7 +19,8 @@ import { UserGroupIcon } from "@heroicons/react/24/outline";
 import BoardMembers from "../Modals/Sidebar/BoardMembers";
 import History from "../Modals/Sidebar/History";
 import ArchivedTask from "../Modals/Sidebar/ArchivedTask";
-
+import { useNavigate } from "react-router-dom";
+import DeleteBoard from "../Modals/Sidebar/DeleteBoard";
 // Array of different colours in hex notation
 const colourHex = [
   "bg-blue-500",
@@ -36,7 +37,7 @@ function TaskSideBar(board: boardProps) {
   const { adminUsers, memberUsers } = board.board;
   const users = [...adminUsers, ...memberUsers];
   const [user, setUser] = useState<User | undefined>(undefined);
-
+  const navigate = useNavigate();
   const auth = getAuth();
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -136,7 +137,7 @@ function TaskSideBar(board: boardProps) {
             ),
             title: "View Previous States",
             onClick: () => {
-              console.log("Activity Clicked");
+              navigate(`/my/history/${board.board.id}`);
             },
           }}
         />
@@ -160,10 +161,8 @@ function TaskSideBar(board: boardProps) {
             icon: (
               <CogIcon className="w-7 h-7 text-zinc-800/90 dark:text-zinc-300" />
             ),
-            title: "Settings",
-            onClick: () => {
-              console.log("Settings Clicked");
-            },
+            title: "Delete Board",
+            modal: <DeleteBoard boardID={board.board.id} />,
           }}
         />
       </section>

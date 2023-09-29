@@ -13,8 +13,8 @@ function TaskOverview({ task }: { task: TTask }) {
       </DialogDescription>
 
       <DialogHeader className="text-xl font-bold">Assigned Users</DialogHeader>
-        <DialogDescription className="  pb-6 border-b border-b-zinc-500">
-           {assignedUsers.length > 0 ? assignedUsers.map((user) => {
+        <DialogDescription className="  pb-6 border-b border-b-zinc-500 flex gap-2">
+           {assignedUsers.length > 0 ? assignedUsers.slice(0,4).map((user) => {
             return(
                 <Avatar className="w-9 h-9">
                     <AvatarImage src={user.photoURL}/>

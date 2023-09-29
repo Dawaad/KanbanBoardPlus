@@ -20,10 +20,14 @@ type Props = React.HtmlHTMLAttributes<HTMLDivElement> & {
 function SidebarSection({ className, iconDetails, ...props }: Props) {
   return (
     <>
-      <Dialog 
-       >
+      <Dialog>
         <DialogTrigger asChild>
           <div
+            onClick={() => {
+              if (iconDetails.onClick) {
+                iconDetails.onClick();
+              }
+            }}
             className={cn(
               "flex items-center overflow-hidden hover:bg-zinc-400/30 hover:dark:bg-zinc-500/30 cursor-pointer",
               className

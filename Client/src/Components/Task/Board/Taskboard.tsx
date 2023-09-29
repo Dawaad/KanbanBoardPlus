@@ -165,7 +165,7 @@ function TaskBoardComp(board: boardProps) {
 
         if (col) {
           const tasks = col.tasks;
-        
+
           const [removed] = tasks.splice(source.index, 1);
           tasks.splice(destination.index, 0, removed);
 
@@ -181,11 +181,9 @@ function TaskBoardComp(board: boardProps) {
               const index = updatedColumns.indexOf(col);
 
               updatedColumns[index] = newCol;
-             
+
               return updatedColumns;
             });
-
-           
 
             //Update Firebase
             axios
@@ -238,6 +236,82 @@ function TaskBoardComp(board: boardProps) {
     }
   };
 
+  const addTask = (
+    title: string,
+    description: string,
+    date: Date,
+    columnID: string
+  ) => {
+    axios
+      .post("http://localhost:3000/api/tasks/create", {
+        columnID: columnID,
+        taskTitle: title,
+        taskDescription: description,
+        taskDate: date,
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          const newTask: TTask = res.data;
+          console.log(newTask);
+          //Update the array of columns to reflect this new change in tasks
+          setBColumns((prev) => {
+            const updatedColumns = [...prev];
+            const index = updatedColumns.findIndex((column) => {
+              return column.id == columnID;
+            });
+            updatedColumns[index].tasks.push(newTask);
+            return updatedColumns;
+          });
+          //Add to history
+          axios.post("http://localhost:3000/api/boards/history", {
+            boardID: board.board.id,
+            userID: user?.uid,
+            action: `Added Task ${title}`,
+          });
+        }
+      });
+  };
+
+  const removeTask = (taskID: string, columnID: string) => {
+    //Remove from Local State
+    //Remove from Database
+    axios
+      .put(`http://localhost:3000/api/tasks/archive/${columnID}/${taskID}`)
+      .then(() => {
+        //Remove task from column
+        setBColumns((prev) => {
+          const updatedColumns = [...prev];
+          const index = updatedColumns.findIndex((column) => {
+            return column.id == columnID;
+          });
+          updatedColumns[index].tasks = updatedColumns[index].tasks.filter(
+            (task) => {
+              return task.id != taskID;
+            }
+          );
+          return updatedColumns;
+        });
+
+        //Add Task to Boards Archived Tasks
+        axios
+          .post("http://localhost:3000/api/boards/archive", {
+            boardID: board.board.id,
+            taskID: taskID,
+          })
+          .then(() => {
+            //Add to history
+            axios.post("http://localhost:3000/api/boards/history", {
+              boardID: board.board.id,
+              userID: user?.uid,
+              action: `Removed Task`,
+            });
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      });
+  };
+
   return (
     <section className="ml-16 g flex flex-col md:flex-row  py-8 w-full mr-12 sm:mr-16 md:mr-0 relative">
       <div className="w-full column-container my-10 md:my-0">
@@ -254,6 +328,8 @@ function TaskBoardComp(board: boardProps) {
                   {bColumns.map((column, index) => {
                     return (
                       <BoardColumn
+                        addTask={addTask}
+                        removeTask={removeTask}
                         boardID={board.board.id}
                         handleColumnDelete={handleColumnDelete}
                         key={column.id}

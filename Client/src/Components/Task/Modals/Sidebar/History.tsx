@@ -46,7 +46,7 @@ function History(boardID: HistoryProps) {
   return (
     <DialogContent  className="py-10">
       <DialogTitle className="text-xl font-bold">Board History</DialogTitle>
-      <DataTable columns={columns} data={parsedHistory} />
+      <DataTable columns={columns} data={parsedHistory.reverse()} />
     </DialogContent>
   );
 }

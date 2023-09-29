@@ -30,10 +30,11 @@ type CardProps = {
   task: TTask;
   index: number;
   boardID: string;
+  columnID: string;
   innerRef: (element: HTMLElement | null) => void;
   dragHandleProps: DraggableProvidedDragHandleProps | null | undefined;
   draggableProps: DraggableProvidedDraggableProps;
-  deleteTaskCallback: (taskID: string) => void;
+  deleteTaskCallback: (taskID: string, columnID: string) => void;
 };
 
 // TODO: Refactor Card for support with Update Task model
@@ -41,6 +42,7 @@ type CardProps = {
 function ColumnCard({
   task,
   boardID,
+  columnID,
   innerRef,
   dragHandleProps,
   draggableProps,
@@ -89,7 +91,13 @@ function ColumnCard({
               <ViewTaskAlert
                 className="text-red-400"
                 title="Archive"
-                modal={<TaskDelete task={task} onDelete={deleteTaskCallback} />}
+                modal={
+                  <TaskDelete
+                    task={task}
+                    onDelete={deleteTaskCallback}
+                    columnID={columnID}
+                  />
+                }
               />
             </DropdownMenuContent>
           </DropdownMenu>

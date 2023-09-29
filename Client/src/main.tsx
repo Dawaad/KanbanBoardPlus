@@ -7,6 +7,7 @@ import "./index.css";
 //Importing Layouts
 import Layout from "./Layouts/Layout";
 import UserLayout from "./Layouts/UserLayout";
+import History from "./pages/my/History";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCU_N-5WYch81E0TWOVTFLZyofWXJ8MeeQ",
@@ -23,6 +24,7 @@ const firebaseApp = initializeApp(firebaseConfig);
 //Loading routes asynchronously
 const Dashboard = React.lazy(() => import("./pages/my/Dashboard"));
 const TaskBoard = React.lazy(() => import("./pages/my/TaskBoard"));
+
 const Login = React.lazy(() => import("./pages/Login"));
 const Home = React.lazy(() => import("./pages/Home"));
 const Error = React.lazy(() => import("./pages/Error"));
@@ -37,6 +39,7 @@ const routes = (
     <Route path="/my" element={<UserLayout />}>
       <Route index element={<Dashboard />} />
       <Route path="board/:boardID" element={<TaskBoard />} />
+      <Route path="history/:boardID" element={<History />} />
     </Route>
     <Route path="/loginerror" element={<LoginError />} />
     <Route path="*" element={<Error />} />

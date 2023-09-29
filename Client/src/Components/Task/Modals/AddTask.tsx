@@ -14,19 +14,23 @@ import { Input } from "@/Components/ui/input";
 import { Textarea } from "@/Components/ui/textarea";
 import { useState } from "react";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
-import { Calendar } from "@/Components/ui/calendar";
-import { TUser } from "@/Types/FirebaseTypes";
+
 import CalendarForm from "@/Components/ui/calendar-form";
 type TaskModalProps = {
-  callBack: (title: string, description: string, date: Date) => void;
+  callBack: (
+    title: string,
+    description: string,
+    date: Date,
+    columnID: string
+  ) => void;
   isBacklogColumn: boolean;
+  columnID: string;
 };
 
-function AddTask({ callBack, isBacklogColumn }: TaskModalProps) {
+function AddTask({ callBack, isBacklogColumn, columnID }: TaskModalProps) {
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [future, setFuture] = useState<boolean>(false);
 
   const handleDateUpdate = (date: Date | undefined) => {
     setDate(date);
@@ -82,9 +86,6 @@ function AddTask({ callBack, isBacklogColumn }: TaskModalProps) {
                 disabled={!isBacklogColumn}
                 type="radio"
                 name="date"
-                onClick={() => {
-                  setFuture(true);
-                }}
               />
               <span
                 className={`ml-2 ${
@@ -116,11 +117,11 @@ function AddTask({ callBack, isBacklogColumn }: TaskModalProps) {
               callBack(
                 title,
                 description,
-                !future ? new Date() : date ? date : new Date()
+                !isBacklogColumn ? new Date() : date ? date : new Date(),
+                columnID
               );
               setTitle("");
               setDescription("");
-              console.log(date);
             }}
           >
             Add Task

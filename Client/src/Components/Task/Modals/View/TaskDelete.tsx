@@ -11,13 +11,14 @@ import {
 } from "@/Components/ui/alert-dialog";
 type TaskDeleteProps = {
   task: TTask;
-  onDelete: (taskID: string) => void;
+  onDelete: (taskID: string, columnID: string) => void;
+  columnID: string;
 };
 
-function TaskDelete({ task, onDelete }: TaskDeleteProps) {
+function TaskDelete({ task, onDelete, columnID }: TaskDeleteProps) {
 
   const handleDelete = () => {
-    onDelete(task.id);
+    onDelete(task.id, columnID);
   };
 
   return (

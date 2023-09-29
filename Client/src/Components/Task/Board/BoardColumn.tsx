@@ -11,6 +11,8 @@ type BoardProps = {
   column: TColumn | undefined;
   boardID: string;
   index: number;
+  addTask: (title: string, description: string, date: Date, columnID: string) => void;
+  removeTask: (taskID: string, columnID: string) => void;
   handleColumnDelete: (columnIndex: number) => void;
 };
 
@@ -18,16 +20,14 @@ function BoardColumn({
   column,
   index,
   handleColumnDelete,
+  addTask,
+  removeTask,
   boardID,
 }: BoardProps) {
   if (!column) return null;
-  const { id, title, backLog } = column;
+  const { id, title, backLog, tasks } = column;
 
-  const [columnTasks, setTasks] = useState<TTask[]>([]);
-
-  useEffect(() => {
-    setTasks(column.tasks);
-  }, [column]);
+  
 
   const [user, setUser] = useState<User | undefined>();
   const auth = getAuth();
@@ -39,67 +39,7 @@ function BoardColumn({
     }
   });
 
-  const removeTask = (taskID: string) => {
-    //Remove from Local State
-    //Remove from Database
-    axios
-      .put(`http://localhost:3000/api/tasks/archive/${id}/${taskID}`)
-      .then(() => {
-        //Update Tasks Archived Date
-        const date = new Date();
-        const taskIndex = columnTasks.findIndex((task) => {
-          return task.id == taskID;
-        });
-        const task = columnTasks[taskIndex];
-        task.archivedDate = date;
-        const newTasks = [...columnTasks];
-
-        newTasks[taskIndex] = task;
-        setTasks(newTasks);
-
-        //Add Task to Boards Archived Tasks
-        axios
-          .post("http://localhost:3000/api/boards/archive", {
-            boardID: boardID,
-            taskID: taskID,
-          })
-          .then(() => {
-            //Add to history
-            axios.post("http://localhost:3000/api/boards/history", {
-              boardID: boardID,
-              userID: user?.uid,
-              action: `Removed Task ${title} from ${column.title}`,
-            });
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      });
-  };
-
-  const addTask = (title: string, description: string, date: Date) => {
-    axios
-      .post("http://localhost:3000/api/tasks/create", {
-        columnID: id,
-        taskTitle: title,
-        taskDescription: description,
-        taskDate: date,
-      })
-      .then((res) => {
-        if (res.status === 200) {
-          const newTask: TTask = res.data;
-          setTasks((prev) => {
-            return [...prev, newTask];
-          });
-          //Add to history
-          axios.post("http://localhost:3000/api/boards/history", {
-            boardID: boardID,
-            userID: user?.uid,
-            action: `Added Task ${title} to ${column.title}`,
-          });
-        }
-      });
-  };
+  
 
   return (
     <Draggable draggableId={id} index={index} isDragDisabled={column.backLog}>
@@ -131,7 +71,7 @@ function BoardColumn({
                       : "dark:border-b-zinc-600/70"
                   }`}
                 >
-                  <button
+                  {/* <button
                     onClick={() => {
                       handleColumnDelete(index);
                     }}
@@ -141,41 +81,38 @@ function BoardColumn({
                         backLog ? "hidden" : ""
                       }`}
                     />
-                  </button>
+                  </button> */}
                   <p className="ml-12">{title}</p>
                 </h2>
                 <div className="space-y-2">
-                  {columnTasks
-                    .filter((task) => {
-                      return !task.archivedDate;
-                    })
-                    .map((task, index) => {
-                      return (
-                        <Draggable
-                          key={`${id}-${task.id}`}
-                          draggableId={`${id}-${task.id}`}
-                          index={index}
-                          isDragDisabled={
-                            new Date(task.assignedDate) > new Date()
-                          }
-                        >
-                          {(provided) => (
-                            <ColumnCard
-                              deleteTaskCallback={removeTask}
-                              boardID={boardID}
-                              task={task}
-                              index={index}
-                              innerRef={provided.innerRef}
-                              dragHandleProps={provided.dragHandleProps}
-                              draggableProps={provided.draggableProps}
-                            />
-                          )}
-                        </Draggable>
-                      );
-                    })}
+                  {tasks.map((task, index) => {
+                    return (
+                      <Draggable
+                        key={`${id}-${task.id}`}
+                        draggableId={`${id}-${task.id}`}
+                        index={index}
+                        isDragDisabled={
+                          new Date(task.assignedDate) > new Date()
+                        }
+                      >
+                        {(provided) => (
+                          <ColumnCard
+                            columnID={id}
+                            deleteTaskCallback={removeTask}
+                            boardID={boardID}
+                            task={task}
+                            index={index}
+                            innerRef={provided.innerRef}
+                            dragHandleProps={provided.dragHandleProps}
+                            draggableProps={provided.draggableProps}
+                          />
+                        )}
+                      </Draggable>
+                    );
+                  })}
                   {provided.placeholder}
                   <div className="flex items-end justify-end p-2">
-                    <AddTask callBack={addTask} isBacklogColumn={backLog} />
+                    <AddTask callBack={addTask} isBacklogColumn={backLog} columnID={id} />
                   </div>
                 </div>
               </div>

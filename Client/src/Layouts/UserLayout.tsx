@@ -103,17 +103,6 @@ const UserLayout: React.FC<LProps> = ({ children }) => {
           </Link>
           {/*Search Bar*/}
           <div className="flex items-center space-x-5  flex-1 justify-end w-full">
-            <form className="hidden md:flex items-center space-x-5 dark:bg-zinc-700/50 border border-zinc-500 rounded-md px-1 shadow-md flex-1 md:flex-initial ">
-              <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search"
-                className="flex-1 outline-none px-2 py-1 bg-transparent text-zinc-800 dark:text-zinc-300"
-              />
-              <button type="submit" hidden>
-                Search
-              </button>
-            </form>
             <button
               className=" transition-all pr-4 flex items-center group "
               onClick={() => {

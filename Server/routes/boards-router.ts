@@ -9,7 +9,8 @@ import {
   handleGetHistoryFromBoard,
   handleAddTaskToArchived,
   handleGetArchivedTaskFromBoard,
-  handleGetUserContribution
+  handleGetUserContribution,
+  handleDeleteBoard,
 } from "../controllers/boards-controllers";
 
 const boardsRouter = Router();
@@ -26,5 +27,9 @@ boardsRouter.get("/history/:boardID", handleGetHistoryFromBoard);
 boardsRouter.get("/board-id/:boardID", handleGetBoardById);
 boardsRouter.get("/user-id/:userID", handleBoardsUserId);
 boardsRouter.get("/users/:boardID", handleGetUsersFromBoard);
-boardsRouter.get("/contribution/:boardID", handleGetUserContribution)
+boardsRouter.get("/contribution/:boardID", handleGetUserContribution);
+
+//Delete Functions
+boardsRouter.delete("/delete/:boardID", handleDeleteBoard);
+
 export default boardsRouter;

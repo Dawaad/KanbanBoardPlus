@@ -24,6 +24,7 @@ import {
   documentId,
   getDocs,
   DocumentReference,
+  deleteDoc,
   Timestamp,
 } from "firebase/firestore";
 
@@ -113,6 +114,8 @@ export const handleCreateBoard: RequestHandler = (
       columns: [docRef],
       adminUsers: [userRef],
       memberUsers: [],
+      history: [],
+      archived: [],
     };
     const boardRef = collection(db, "boards");
     addDoc(boardRef, boardDoc)
@@ -230,7 +233,7 @@ export const handleGetBoardById: RequestHandler = async (
       adminUsers: adminUsers,
       memberUsers: memberUsers,
       history: history,
-      // archived: archivedTasks,
+      archived: archivedTasks,
     };
 
     res.send(board).status(200);
@@ -423,13 +426,45 @@ export const handleGetUserContribution = async (
           totalTasks: totalSum,
           userContribution: userCont,
         };
-        
+
         res.send(memberContribution).status(200);
       }
     })
     .catch((err) => {
       res.send(err).status(500);
     });
+};
+
+export const handleDeleteBoard = async (req: Request, res: Response) => {
+  //Delete All Task Documents
+  //Delete All Column Documents
+  //Delete Board Document
+
+  const boardID = req.params.boardID;
+  const boardRef = doc(db, "boards", boardID);
+  getDoc(boardRef).then((boardSnap: DocumentSnapshot) => {
+    if (boardSnap.exists()) {
+      //Retrieve Board Data
+      const board = boardSnap.data();
+      const columns: DocumentReference[] = board?.columns;
+      columns.forEach((column) => {
+        //Retrieve and Delete all Tasks
+        getDoc(column).then((columnSnap: DocumentSnapshot) => {
+          if (columnSnap.exists()) {
+            const columnData = columnSnap.data();
+            const tasks: DocumentReference[] = columnData?.tasks;
+            for (const task of tasks) {
+              deleteDoc(task);
+            }
+            deleteDoc(column);
+          }
+        });
+      });
+      deleteDoc(boardRef).then(() => {
+        res.send("Board Deleted").status(200);
+      });
+    }
+  });
 };
 
 /*Helper Functions */

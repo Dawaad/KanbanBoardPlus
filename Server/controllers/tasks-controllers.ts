@@ -38,14 +38,14 @@ export const handleCreateTask: RequestHandler = (
   }).then((docRef) => {
     const taskID = docRef.id;
     const insertedTask = {
+      id: taskID,
       title: taskTitle,
       description: taskDescription,
       assignedUsers: assignedUsers,
       assignedDate: assignedDate,
       archivedDate: null,
-      locationColumn: [columnID],
+      locationColumn: [doc(db, "columns", columnID)],
       locationDate: [date],
-      id: taskID,
     };
 
     //Retrieve Column Document
@@ -92,8 +92,26 @@ export const handleArchiveTaskById: RequestHandler = (
   req: Request,
   res: Response
 ) => {
+  const columnRef = doc(db, "columns", req.params.columnId);
   const taskRef = doc(db, "tasks", req.params.taskId);
   const date = new Date();
+  //Remove Task from Column
+  getDoc(columnRef).then((columnSnap: DocumentSnapshot) => {
+    if (columnSnap.exists()) {
+      const column = columnSnap.data();
+      const tasks: DocumentReference[] = column?.tasks;
+      const updatedTasks = tasks.filter(
+        (task) => task.id !== req.params.taskId
+      );
+      updateDoc(columnRef, { tasks: updatedTasks })
+        .then(() => {
+          console.log("Column Document Updated");
+        })
+        .catch((err) => {
+          res.status(500).send(err);
+        });
+    }
+  });
   //Update Archival Status in Task
   updateDoc(taskRef, { archivedDate: date })
     .then(() => {
@@ -132,10 +150,10 @@ export const handleSingleColumnTaskSwap: RequestHandler = (
     if (columnSnap.exists()) {
       const column = columnSnap.data();
       const tasks: DocumentReference[] = column?.tasks;
-      console.log(tasks.map((task) => task.id));
+
       const [removed] = tasks.splice(sourceIndex, 1);
       tasks.splice(destIndex, 0, removed);
-      console.log(tasks.map((task) => task.id));
+
       updateDoc(columnRef, { tasks: tasks })
         .then(() => {
           console.log("Column Document Updated");
@@ -174,7 +192,8 @@ export const handleSwapTaskMultiColumn: RequestHandler = async (
       const task = taskSnap.data();
       const locationColumn = task?.locationColumn;
       const locationDate = task?.locationDate;
-      locationColumn.push(destColumnID);
+      const columnRef = doc(db, "columns", destColumnID);
+      locationColumn.push(columnRef);
       locationDate.push(new Date());
       await updateDoc(taskRef, {
         locationColumn: locationColumn,

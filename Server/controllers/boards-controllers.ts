@@ -516,7 +516,7 @@ const getColumnsFromRef = async (
             id: columnDoc.id,
             title: columnData.title,
             tasks: tasks,
-            createdDate: columnData.createdDate,
+            createdDate: columnData.createdDate.toDate(),
             archived: columnData.archived,
             archivedDate: columnData.archivedDate,
             backLog: columnData.backLog,
@@ -574,6 +574,9 @@ const getTasksFromRef = async (
 
         const archivedDate: Timestamp | null = taskData.archivedDate;
 
+        const locationData = taskData.locationDate;
+
+
         const task: TTask = {
           id: taskDoc.id,
           title: taskData.title,
@@ -582,7 +585,7 @@ const getTasksFromRef = async (
           assignedDate: taskData.assignedDate,
           archivedDate: archivedDate ? archivedDate.toDate() : null,
           locationColumn: taskData.locationColumn,
-          locationDate: taskData.locationDate,
+          locationDate: taskData.locationDate.map((date: Timestamp) => date.toDate()),
         };
         return task;
       }

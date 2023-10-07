@@ -44,7 +44,7 @@ export const handleCreateTask: RequestHandler = (
       assignedUsers: assignedUsers,
       assignedDate: assignedDate,
       archivedDate: null,
-      locationColumn: [doc(db, "columns", columnID)],
+      locationColumn: [columnID],
       locationDate: [date],
     };
 
@@ -193,7 +193,7 @@ export const handleSwapTaskMultiColumn: RequestHandler = async (
       const locationColumn = task?.locationColumn;
       const locationDate = task?.locationDate;
       const columnRef = doc(db, "columns", destColumnID);
-      locationColumn.push(columnRef);
+      locationColumn.push(destColumnID);
       locationDate.push(new Date());
       await updateDoc(taskRef, {
         locationColumn: locationColumn,

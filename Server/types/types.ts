@@ -22,7 +22,7 @@ export type TTask = {
   assignedDate: Date;
 
   archivedDate: Date | null;
-  locationColumn: DocumentReference[];
+  locationColumn: string[];
   locationDate: Date[];
 };
 

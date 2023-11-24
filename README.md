@@ -1,4 +1,4 @@
-# FIT3162-Project
+# Kanban Board Application
 
 ## Project Description
-stuff
+This is a Kanban Board based application with further extensions to its core functionalities

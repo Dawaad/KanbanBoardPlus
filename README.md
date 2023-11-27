@@ -1,4 +1,2 @@
-# Kanban Board Application
-
-## Project Description
-This is a Kanban Board based application with further extensions to its core functionalities
+# Kanban Board Plus
+A fully functioning Kanban Board centred application with the implementation of further additional features to improve group collaboration and communication.
